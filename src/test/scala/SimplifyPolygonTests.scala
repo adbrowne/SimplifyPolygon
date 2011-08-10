@@ -43,7 +43,13 @@ class StackSpec extends FlatSpec with ShouldMatchers {
     val endPoint = new Point(1,0)
 
     point.distanceTo(startPoint,endPoint) should equal(1)
+  }
 
+  "A point's distance" should "be equal to the distance to the point where startPoint and endPoint are the same" in{
+    val point = new Point(2,0)
+      val startAndEndPoint = new Point(0,0)
+
+      point.distanceTo(startAndEndPoint, startAndEndPoint) should equal(2)
   }
 
   "A single point line" should "return itself" in {
