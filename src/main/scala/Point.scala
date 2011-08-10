@@ -38,6 +38,7 @@ class Point(val x: Double, val y: Double){
     }
   }
 
+  override def toString = "(" + x + "," + y + ")"
   override def hashCode = 41 * (41 + x.toInt) + y.toInt
 
   override def equals(other: Any) = other match {

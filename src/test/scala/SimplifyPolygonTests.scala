@@ -39,10 +39,10 @@ class StackSpec extends FlatSpec with ShouldMatchers {
 
   "A Point's distance" should "be to the nearest end not an infinite line" in{
     val point = new Point(2,0)
-    val startPoint = new Point(0,0)
-    val endPoint = new Point(1,0)
+      val startPoint = new Point(0,0)
+      val endPoint = new Point(1,0)
 
-    point.distanceTo(startPoint,endPoint) should equal(1)
+      point.distanceTo(startPoint,endPoint) should equal(1)
   }
 
   "A point's distance" should "be equal to the distance to the point where startPoint and endPoint are the same" in{
@@ -72,7 +72,7 @@ class StackSpec extends FlatSpec with ShouldMatchers {
       val line = List(startPoint, midPoint, endPoint)
       (Simplify.simplify(line,1)) should equal(List(startPoint,endPoint))
   }
-  
+
   "A three point line" should "leave the middle point when it's closer than epsilon from the line" in {
     val startPoint = new Point(0,0)
       val midPoint = new Point(1,0.9)
@@ -80,7 +80,7 @@ class StackSpec extends FlatSpec with ShouldMatchers {
       val line = List(startPoint, midPoint, endPoint)
       (Simplify.simplify(line,1)) should equal(List(startPoint,endPoint))
   }
-  
+
   "A three point line" should "leave the middle point when it's further than epsilon from the line" in {
     val startPoint = new Point(0,0)
       val midPoint = new Point(1,1.1)
@@ -88,4 +88,27 @@ class StackSpec extends FlatSpec with ShouldMatchers {
       val line = List(startPoint, midPoint, endPoint)
       (Simplify.simplify(line,1)) should equal(line)
   }
+
+  "A four point line" should "remove the middle points where they are both near the line" in {
+    val startPoint = new Point(0,0)
+      val midPoint1 = new Point(1,0.1)
+      val midPoint2 = new Point(2,0.1)
+      val endPoint = new Point(3,0)
+      val line = List(startPoint, midPoint1,midPoint2, endPoint)
+      (Simplify.simplify(line,1)) should equal(List(startPoint, endPoint))
+  }
+
+  "A five point line" should " recusively simplify to leave some points" in{
+    val startPoint = new Point(0,0);
+    val endPoint = new Point(8,0);
+    val midPoint = new Point(4,3);
+    val line = List(
+      startPoint,
+      new Point(2.4,1.2),
+      midPoint,
+      new Point(6.4,2),
+      endPoint
+    )
+  (Simplify.simplify(line,1)) should equal(List(startPoint, midPoint,endPoint))
+}
 }
