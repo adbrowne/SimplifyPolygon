@@ -1,10 +1,13 @@
 object Simplify{
-  def maxDistance(lineStart: Point, lineEnd: Point, points: List[Point]) = {
-    val distances = (points map(_.distanceTo(lineStart, lineEnd))) toArray
+  def maxDistance(line: List[Point]) = {
+    var lineStart = line.head
+    var lineEnd = line.last
+
+    val distances = (line map(_.distanceTo(lineStart, lineEnd))) toArray
     var max = 0.0
     var maxIndex = 0
 
-    for(i <- 0 until distances.length){
+    for(i <- 1 until distances.length - 1){
       if(distances(i) > max){
         max = distances(i)
         maxIndex = i
@@ -13,28 +16,28 @@ object Simplify{
     (max, maxIndex)
   }
 
+  def divideLine(line: List[Point], midPointIndex: Int) = {
+        val splitIndex = midPointIndex
+        val (beforeMidpoint, rest) = line splitAt splitIndex
+        val midPoint :: afterMidpoint = rest
+        (beforeMidpoint ::: List(midPoint), midPoint ::  afterMidpoint)
+  }
+
   // http://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm
   def simplify(line: List[Point], epsilon: Double) : List[Point] = {
     val linePoints = line.length
     if(line.length <= 2)
       line
     else{
-      var lineStart = line.head
-      var lineEnd = line.last
-      var midPoints = line.tail.reverse.tail.reverse
-
-      var max = maxDistance(lineStart, lineEnd, midPoints);
-
-      if(max._1 > epsilon){
-        val splitIndex = max._2
-        val (beforeMidpoint, rest) = midPoints splitAt splitIndex
-        val midPoint :: afterMidpoint = rest
-        val simple1 = simplify(lineStart :: beforeMidpoint ++ List(midPoint),epsilon)
-        val simple2 = simplify(List(midPoint) ++  afterMidpoint ++ List(lineEnd) ++ List(),epsilon)
-        simple1 ++ (simple2 tail)
+      val (maxDistanceAmount, maxDistanceIndex) = maxDistance(line);
+      if(maxDistanceAmount > epsilon){
+        val (segment1, segment2) = divideLine(line, maxDistanceIndex)
+        val simple1 = simplify(segment1,epsilon)
+        val midPoint :: simple2 = simplify(segment2,epsilon)
+        simple1 ++ simple2
       }
       else{
-        List(lineStart, lineEnd) 
+        line.head :: line.last :: Nil
       }
     }
   }
