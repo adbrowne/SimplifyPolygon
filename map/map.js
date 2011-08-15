@@ -9,7 +9,7 @@ function loadFile(fileNum,map){
   colors.push("#FF800D")
   colors.push("#4A9586")
   
-  $.getJSON("./mapdata/"+fileNum+"_simple.js", function(data){
+  $.getJSON("./mapdata/all_scala.js", function(data){
     var mapPoints = data.mappoints;
     var shapes = []
 
@@ -29,7 +29,7 @@ function loadFile(fileNum,map){
   // Construct the polygon
   // Note that we don't specify an array or arrays, but instead just
   // a simple array of LatLngs in the paths property
-  bermudaTriangle = new google.maps.Polygon({
+  /*bermudaTriangle = new google.maps.Polygon({
     paths: shapes,
                   strokeColor: colors[fileNum], 
                   strokeOpacity: 0.8,
@@ -39,7 +39,7 @@ function loadFile(fileNum,map){
   });
 
   bermudaTriangle.setMap(map);
-  });
+  });*/
 
 
 }
