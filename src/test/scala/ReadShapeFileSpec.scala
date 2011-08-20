@@ -75,13 +75,52 @@ package net.hasnext.mapping.tests{
             val p = new java.io.PrintWriter(f)
               try { op(p) } finally { p.close() }
           }
+          def pointToString(point: Point) = {
+            val stringBuilder = new StringBuilder
+            stringBuilder append "{"
+            stringBuilder append "\"X\":"
+            stringBuilder append point.X
+            stringBuilder append ","
+            stringBuilder append "\"Y\":"
+            stringBuilder append point.Y
+            stringBuilder append "}"
+
+            stringBuilder toString
+          }
+          def partToString(part: Part) = {
+            val stringBuilder = new StringBuilder
+            stringBuilder append "{"
+            stringBuilder append "\"points\":["
+
+            val pointStrings = part.points.map((x: Point) => pointToString(x))
+           
+            stringBuilder append (pointStrings mkString ",")
+
+            stringBuilder append "]"
+            stringBuilder append "}"
+            stringBuilder toString
+          }
+          def shapeToString(shape: Shape) = {
+            val stringBuilder = new StringBuilder
+            stringBuilder append "{ \"recordNumber\":" 
+            stringBuilder append shape.recordNumber
+            stringBuilder append ","
+            stringBuilder append "\"parts\":["
+            
+            val partStrings = shape.parts.map((x: Part) => partToString(x))
+
+            stringBuilder append (partStrings mkString ",")
+
+            stringBuilder append "]}"
+            stringBuilder toString
+          }
           import net.liftweb.json.JsonAST._
           import net.liftweb.json.Extraction._
           import net.liftweb.json.Printer._
           implicit val formats = net.liftweb.json.DefaultFormats
 
           def writeFile(recordNum: Int, shape: Shape) {
-            val outputString = pretty(render(decompose(shape)))
+            val outputString = shapeToString(shape)
 
               val outputFile = "./map/postcodes/"+recordNum+".js"
             printToFile(new java.io.File(outputFile))(p => {
@@ -89,7 +128,7 @@ package net.hasnext.mapping.tests{
               })
 
           }
-          val shapeFile = ShapeFileLoader.actionFile("../erl-shapelib/aus_postcodes/POA06aAUST_region.shp", writeFile)
+           val shapeFile = ShapeFileLoader.actionFile("../erl-shapelib/aus_postcodes/POA06aAUST_region.shp", writeFile)
         }
       }
     }

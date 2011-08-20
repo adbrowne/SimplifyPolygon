@@ -96,19 +96,16 @@ object ShapeFileLoader{
         pointIndexes.update(i, partStartIndex)
     }
 
-    var points = mutable.ArraySeq[Point]()
+    //var points = mutable.ArraySeq[Point]()
       val pointIndexOffset = partIndexOffset + partCount * 4
     //println("partIndexOffset: " + partIndexOffset)
     //println("pointIndexOffset: " + pointIndexOffset)
-    for(i <- 0 until pointCount){
-      val point = readPoint(pointIndexOffset + 16 * i, buffer) 
-      points = points :+ point
-    }
+    val points = (0 until pointCount).map((i: Int) => readPoint(pointIndexOffset + 16 * i, buffer))
     new Shape(recordNumber, contentLength, new BoundingBox(min, max), partCount, pointCount, getParts(pointIndexes, points)) 
   }
 
     import scala.collection.mutable
-  def getParts(pointIndexes: mutable.ArraySeq[Int], points: mutable.ArraySeq[Point]) = {
+  def getParts(pointIndexes: mutable.ArraySeq[Int], points: Seq[Point]) = {
     var parts = mutable.ArraySeq[Part]()
 
       val partCount = pointIndexes.length
