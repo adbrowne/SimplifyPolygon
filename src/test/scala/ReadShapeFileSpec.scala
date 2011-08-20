@@ -76,16 +76,10 @@ package net.hasnext.mapping.tests{
               try { op(p) } finally { p.close() }
           }
           def pointToString(point: Point) = {
-            val stringBuilder = new StringBuilder
-            stringBuilder append "{"
-            stringBuilder append "\"X\":"
-            stringBuilder append point.X
-            stringBuilder append ","
-            stringBuilder append "\"Y\":"
-            stringBuilder append point.Y
-            stringBuilder append "}"
-
-            stringBuilder toString
+            """{
+              "X":""" + point.X + """,
+              "Y":""" + point.Y + """
+            }"""
           }
           def partToString(part: Part) = {
             val stringBuilder = new StringBuilder
