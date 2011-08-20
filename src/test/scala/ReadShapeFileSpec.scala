@@ -54,9 +54,9 @@ package net.hasnext.mapping.tests{
           firstShape.parts.head.points.length should equal (75)
         }
         "Shape" should "should turn into Json" in {
-    import net.liftweb.json.JsonAST._
-    import net.liftweb.json.Extraction._
-    import net.liftweb.json.Printer._
+          import net.liftweb.json.JsonAST._
+          import net.liftweb.json.Extraction._
+          import net.liftweb.json.Printer._
           implicit val formats = net.liftweb.json.DefaultFormats
           val shapeFile = ShapeFileLoader.readFile("./data/australia/australia.shp")
             val outputString = pretty(render(decompose(shapeFile)))
@@ -69,6 +69,27 @@ package net.hasnext.mapping.tests{
           printToFile(new java.io.File(outputFile))(p => {
               p.println(outputString)
             })
+        }
+        "Shape" should "should turn into seperate Json" in {
+          def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
+            val p = new java.io.PrintWriter(f)
+              try { op(p) } finally { p.close() }
+          }
+          import net.liftweb.json.JsonAST._
+          import net.liftweb.json.Extraction._
+          import net.liftweb.json.Printer._
+          implicit val formats = net.liftweb.json.DefaultFormats
+
+          def writeFile(recordNum: Int, shape: Shape) {
+            val outputString = pretty(render(decompose(shape)))
+
+              val outputFile = "./map/postcodes/"+recordNum+".js"
+            printToFile(new java.io.File(outputFile))(p => {
+                p.println(outputString)
+              })
+
+          }
+          val shapeFile = ShapeFileLoader.actionFile("../erl-shapelib/aus_postcodes/POA06aAUST_region.shp", writeFile)
         }
       }
     }

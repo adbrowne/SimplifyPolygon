@@ -27,6 +27,30 @@ object ShapeFileLoader{
   def readPoint(startIndex: Int, buffer: java.nio.ByteBuffer) = {
     new Point(buffer.getDouble(startIndex), buffer.getDouble(startIndex + 8))
   }
+
+  def actionFile(fileName: String, actionShape: (Int, Shape) => Unit) {
+    val file = new File(fileName)
+      val fileSize = file.length
+    val stream = new FileInputStream(file)
+      val buffer = stream.getChannel.map(READ_ONLY, 0, fileSize)
+
+      buffer.order(BIG_ENDIAN)
+    val fileLength = buffer.getInt(24)
+
+      buffer.order(LITTLE_ENDIAN)
+    val version = buffer.getInt(28)
+      val shapeType = buffer.getInt(32)
+      val min = readPoint(36, buffer)
+      val max = readPoint(52, buffer)
+
+      var currentOffset = 100
+      while(currentOffset < fileLength*2){
+        val shape = readShape(buffer,currentOffset)
+          actionShape(shape.recordNumber, shape)
+        currentOffset = currentOffset + shape.contentLength * 2 + 8
+      }
+
+  }
   def readFile(fileName: String) = {
     val file = new File(fileName)
       val fileSize = file.length
