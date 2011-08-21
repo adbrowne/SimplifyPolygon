@@ -49,7 +49,7 @@ object ShapeFileLoader{
       val built =  dispatcher
     .withNewThreadPoolWithLinkedBlockingQueueWithCapacity(100)
     .setCorePoolSize(16)
-    .setMaxPoolSize(100)
+    .setMaxPoolSize(1000)
     .setKeepAliveTimeInMillis(60000)
     .setRejectionPolicy(new CallerRunsPolicy)
     .build
