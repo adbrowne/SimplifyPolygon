@@ -19,7 +19,6 @@ class ShapeFile(
   val shapes: List[Shape]
 )
 class Part(val points: List[Point])
-case class Point(val X: Double, val Y: Double)
 case class BoundingBox(val min: Point, val max: Point)
 
 

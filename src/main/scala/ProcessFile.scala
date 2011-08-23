@@ -7,25 +7,26 @@ package net.hasnext.mapping{
     def pointToString(point: Point, output: String => Unit) = {
       output("""{
           "X":""")
-        output(point.X.toString)
+        output(point.x.toString)
         output(""",
           "Y":""") 
-        output(point.Y.toString)
+        output(point.y.toString)
         output( """
         }""" )
     }
     def partToString(part: Part, output: String => Unit) = {
-      output("""{
-          "points":[""") 
+      val points = Simplify.simplify(part.points,0.05)
+        output("""{
+            "points":[""") 
 
-        var first = true
-        part.points.foreach(
-          s => {
-            if(!first) output(",")
-              pointToString(s,output) 
-            first = false
-          })
-        output("]}")
+          var first = true
+          points.foreach(
+            s => {
+              if(!first) output(",")
+                pointToString(s,output) 
+              first = false
+            })
+          output("]}")
       }
       def shapeToString(shape: Shape, output: String => Unit) = {
         output ("""{ "recordNumber":""" + shape.recordNumber + """

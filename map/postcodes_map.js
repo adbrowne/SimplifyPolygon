@@ -30,9 +30,9 @@ function loadFile(map, number){
       }
     bermudaTriangle = new google.maps.Polygon({
       paths: shapeCoords,
-                    strokeColor: colors["#000000"], 
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
+                    strokeColor: "#000000",
+                    strokeOpacity: 0.35,
+                    strokeWeight: 0.5,
                     fillColor: colors[shape.recordNumber % 8],
                     fillOpacity: 0.35
     });
@@ -79,7 +79,7 @@ var myOptions = {
 var map = new google.maps.Map(document.getElementById("map_canvas"),
     myOptions);
 
-for(var i=1689;i < 2050;i++){
+for(var i=1;i <= 2507;i++){
 loadFile(map,i)
 }
 
