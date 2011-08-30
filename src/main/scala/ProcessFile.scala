@@ -16,18 +16,21 @@ package net.hasnext.mapping{
     }
     def partToEncodedString(part: Part, output: String => Unit) = {
       val points = Simplify.simplify(part.points,0.05)
-      val result = PolygonEncode.encode(points)
-      val encodedResult = result.replace("\\", "\\\\")
+
+        val result = PolygonEncode.encode(points)
+        val encodedResult = result.replace("\\", "\\\\")
         output("""{"points":""") 
-          output("\"")
-          output(encodedResult)
-          output("\"")
-          output("}")
+      output("\"")
+      output(encodedResult)
+      output("\"")
+      output("}")
     }
 
-    def partToString(part: Part, output: String => Unit) = {
+    def partToString(startComma: Boolean, part: Part, output: String => Unit) = {
       val points = Simplify.simplify(part.points,0.05)
-        output("""{
+        if(points.length > 3){
+          if(startComma) output(",")
+          output("""{
             "points":[""") 
 
           var first = true
@@ -38,6 +41,11 @@ package net.hasnext.mapping{
               first = false
             })
           output("]}")
+          true
+        }
+        else{
+          false
+        }
       }
       def shapeToString(shape: Shape, output: String => Unit) = {
         output ("""{ "recordNumber":""" + shape.recordNumber + """
@@ -47,9 +55,9 @@ package net.hasnext.mapping{
         var first = true
         shape.parts.foreach(
           s => {
-            if(!first) output(",")
-              partToEncodedString(s,output) 
-            first = false
+            val printed = partToString(!first, s,output) 
+              if(printed)
+              first = false
           })
 
         output ("]}")
@@ -65,17 +73,34 @@ package net.hasnext.mapping{
       def writeFile(recordNum: Int, shape: Shape) {
         //val outputString = shapeToString(shape)
 
-        val outputFile = "./map/postcodese/"+recordNum+".js"
+        val outputFile = "./map/all_0_5.js"
         printToFile(new java.io.File(outputFile))(p => {
             shapeToString(shape, p.print)
             //p.println(outputString)
           })
       }
+      def writeShape(p: java.io.PrintWriter)(recordNum: Int, shape: Shape){
+        if(recordNum > 1)
+          p.print(",")
+
+        shapeToString(shape, p.print)
+      }
       Console.println("Press enter to start2")
       Console.readLine
-      val startTime = System.currentTimeMillis()
-        val shapeFile = ShapeFileLoader.actionFile("../erl-shapelib/aus_postcodes/POA06aAUST_region.shp", writeFile)
-        val endTime = System.currentTimeMillis()
+      val file = new java.io.File("./map/all_0_5.js")
+        val p = new java.io.PrintWriter(file)
+        try { 
+        p.print("""{"shapes":[""")
+        val shapeAction = writeShape(p)_
+        val startTime = System.currentTimeMillis()
+          val inputFileName ="../erl-shapelib/aus_postcodes/POA06aAUST_region.shp"
+        val shapeFile = ShapeFileLoader.actionFile(inputFileName, shapeAction)
+          val endTime = System.currentTimeMillis()
+          p.print("""]}""")
         Console.println(endTime - startTime)
+      }
+      finally { 
+        p.close() 
+      }
     }
   }

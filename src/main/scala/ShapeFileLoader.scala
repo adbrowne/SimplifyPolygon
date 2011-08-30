@@ -43,7 +43,7 @@ object ShapeFileLoader{
       val max = readPoint(52, buffer)
 
       var currentOffset = 100
-    import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy
+    /*    import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy
     val dispatcher = akka.dispatch.Dispatchers.newExecutorBasedEventDrivenDispatcher("name")
       val built =  dispatcher
     .withNewThreadPoolWithLinkedBlockingQueueWithCapacity(100)
@@ -51,10 +51,10 @@ object ShapeFileLoader{
     .setMaxPoolSize(1000)
     .setKeepAliveTimeInMillis(60000)
     .setRejectionPolicy(new CallerRunsPolicy)
-    .build
+    .build */
 
     while(currentOffset < fileLength*2){
-      val shapeContentLength = readAndActionShape(buffer,currentOffset,actionShape, built)
+      val shapeContentLength = readAndActionShape(buffer,currentOffset,actionShape)
         currentOffset = currentOffset + shapeContentLength * 2 + 8
     }
 
@@ -86,7 +86,7 @@ object ShapeFileLoader{
 
   }
 
-  private def readAndActionShape(buffer: java.nio.ByteBuffer,  offset: Int,actionShape: (Int, Shape) => Unit, dispatcher: akka.dispatch.MessageDispatcher) = {
+  private def readAndActionShape(buffer: java.nio.ByteBuffer,  offset: Int,actionShape: (Int, Shape) => Unit) = {
     import scala.collection.mutable
     buffer.order(BIG_ENDIAN)
     val recordNumber = buffer.getInt(offset)
@@ -113,19 +113,7 @@ object ShapeFileLoader{
 
 
       val shape =   new Shape(recordNumber, contentLength, new BoundingBox(min, max), partCount, pointCount, getParts(pointIndexes, points)) 
-      import akka.actor.Actor
-    val a = Actor.actorOf(
-      new Actor {
-        self.dispatcher = dispatcher
-        def receive = {
-          case _ =>{ 
-            actionShape(shape.recordNumber, shape) 
-          }
-        }
-      })
-
-    a.start()
-    a !!! "start"
+      actionShape(shape.recordNumber, shape) 
 
     //actionShape(shape.recordNumber, shape) 
 

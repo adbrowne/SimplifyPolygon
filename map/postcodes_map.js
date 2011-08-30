@@ -9,8 +9,12 @@ function loadFile(map, number){
     colors.push("#FF800D")
     colors.push("#4A9586")
 
-    $.getJSON("./postcodes/"+number+".js", function(data){
-      var shape = data
+    $.getJSON("./all_0_5.js", function(data){
+      var shapes = data.shapes;
+
+      var shapeCount = shapes.length
+      for(var shapeIndex = 0; shapeIndex < shapeCount; shapeIndex +=1){
+        var shape = shapes[shapeIndex]
 
       var shapeCoords = [];
       var parts = shape.parts
@@ -39,36 +43,8 @@ function loadFile(map, number){
 
     bermudaTriangle.setMap(map);
 
+      }
     })
-  /*jvar shapeCount = mapPoints.length
-    for(var shapeIndex = 0; shapeIndex < shapeCount; shapeIndex+=1){
-    var triangleCoords = [];
-    var firstShape = mapPoints[shapeIndex];
-    var pointCount = firstShape.length;
-    for(var pointIndex = 0; pointIndex < pointCount; pointIndex+=1){
-    var point = firstShape[pointIndex];
-    if(point != undefined){
-    triangleCoords.push(new google.maps.LatLng(point[1], point[0]));
-    }
-    }
-    shapes.push(triangleCoords)
-    }*/
-  // Construct the polygon
-  // Note that we don't specify an array or arrays, but instead just
-  // a simple array of LatLngs in the paths property
-  /*  bermudaTriangle = new google.maps.Polygon({
-      paths: shapes,
-      strokeColor: colors[fileNum], 
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: colors[fileNum],
-      fillOpacity: 0.35
-      });
-
-      bermudaTriangle.setMap(map);
-      });
-
-*/
 }
 var latlng = new google.maps.LatLng(-29.000221252441406,141.00265502929688);
 var myOptions = {
@@ -79,7 +55,5 @@ var myOptions = {
 var map = new google.maps.Map(document.getElementById("map_canvas"),
     myOptions);
 
-for(var i=1;i <= 2507;i++){
-loadFile(map,i)
-}
+loadFile(map)
 
