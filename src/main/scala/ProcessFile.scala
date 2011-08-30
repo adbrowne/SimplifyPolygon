@@ -14,6 +14,17 @@ package net.hasnext.mapping{
         output( """
         }""" )
     }
+    def partToEncodedString(part: Part, output: String => Unit) = {
+      val points = Simplify.simplify(part.points,0.05)
+      val result = PolygonEncode.encode(points)
+      val encodedResult = result.replace("\\", "\\\\")
+        output("""{"points":""") 
+          output("\"")
+          output(encodedResult)
+          output("\"")
+          output("}")
+    }
+
     def partToString(part: Part, output: String => Unit) = {
       val points = Simplify.simplify(part.points,0.05)
         output("""{
@@ -37,7 +48,7 @@ package net.hasnext.mapping{
         shape.parts.foreach(
           s => {
             if(!first) output(",")
-              partToString(s,output) 
+              partToEncodedString(s,output) 
             first = false
           })
 
@@ -54,9 +65,9 @@ package net.hasnext.mapping{
       def writeFile(recordNum: Int, shape: Shape) {
         //val outputString = shapeToString(shape)
 
-        val outputFile = "./map/postcodes/"+recordNum+".js"
+        val outputFile = "./map/postcodese/"+recordNum+".js"
         printToFile(new java.io.File(outputFile))(p => {
-            shapeToString(shape, p.println)
+            shapeToString(shape, p.print)
             //p.println(outputString)
           })
       }
