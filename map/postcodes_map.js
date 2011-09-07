@@ -9,7 +9,7 @@ function loadFile(map, number){
     colors.push("#FF800D")
     colors.push("#4A9586")
 
-    $.getJSON("./all_0_5.js", function(data){
+    $.getJSON("./all_0_05.js", function(data){
       var shapes = data.shapes;
 
       var shapeCount = shapes.length

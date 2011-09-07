@@ -32,4 +32,3 @@ seq(sbtassembly.Plugin.assemblySettings: _*)
       "se.scalablesolutions.akka" % "akka-amqp" % "1.1.3",
       "se.scalablesolutions.akka" % "akka-testkit" % "1.1.3"
       )
-

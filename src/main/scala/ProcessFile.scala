@@ -7,10 +7,10 @@ package net.hasnext.mapping{
     def pointToString(point: Point, output: String => Unit) = {
       output("""{
           "X":""")
-        output(point.x.toString)
+        output("%1.2f" format point.x)
         output(""",
           "Y":""") 
-        output(point.y.toString)
+        output("%1.2f" format point.y)
         output( """
         }""" )
     }
@@ -27,7 +27,7 @@ package net.hasnext.mapping{
     }
 
     def partToString(startComma: Boolean, part: Part, output: String => Unit) = {
-      val points = Simplify.simplify(part.points,0.05)
+      val points = Simplify.simplify(part.points,0.005)
         if(points.length > 3){
           if(startComma) output(",")
           output("""{
@@ -73,7 +73,7 @@ package net.hasnext.mapping{
       def writeFile(recordNum: Int, shape: Shape) {
         //val outputString = shapeToString(shape)
 
-        val outputFile = "./map/all_0_5.js"
+        val outputFile = "./map/all_0_05.js"
         printToFile(new java.io.File(outputFile))(p => {
             shapeToString(shape, p.print)
             //p.println(outputString)
@@ -87,7 +87,7 @@ package net.hasnext.mapping{
       }
       Console.println("Press enter to start2")
       Console.readLine
-      val file = new java.io.File("./map/all_0_5.js")
+      val file = new java.io.File("./map/all_0_05.js")
         val p = new java.io.PrintWriter(file)
         try { 
         p.print("""{"shapes":[""")
