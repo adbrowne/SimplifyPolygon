@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="acme.jar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/acme.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
