@@ -7,12 +7,12 @@ import scala.collection.mutable.Stack
 
 class JsonSpec extends FlatSpec with ShouldMatchers {
   "A json file" should "be loadable" in {
-    val source = scala.io.Source.fromFile("/home/adb/public_html/map/mapdata/1.js")
+    val source = scala.io.Source.fromFile("./map/mapdata/1.js")
     val lines = source.mkString
     source.close
   }
   "A json file" should "can be parsed" in {
-    val source = scala.io.Source.fromFile("/home/adb/public_html/map/mapdata/1.js")
+    val source = scala.io.Source.fromFile("./map/mapdata/1.js")
     val lines = source.mkString
     source.close
 
