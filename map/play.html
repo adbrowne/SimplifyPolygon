@@ -1,0 +1,37 @@
+<html>
+<head><title>blah</title></head>
+<body>
+<script type="text/javascript">
+var encodeNumber = function(num) {
+  var encodeString = "";
+  var nextValue, finalValue;
+  while (num >= 0x20) {
+    nextValue = (0x20 | (num & 0x1f)) + 63;
+//     if (nextValue == 92) {
+//       encodeString += (String.fromCharCode(nextValue));
+//     }
+    encodeString += (String.fromCharCode(nextValue));
+    num >>= 5;
+  }
+  finalValue = num + 63;
+//   if (finalValue == 92) {
+//     encodeString += (String.fromCharCode(finalValue));
+//   }
+  encodeString += (String.fromCharCode(finalValue));
+  return encodeString;
+}
+
+// This one is Google's verbatim.
+var encodeSignedNumber = function(num) {
+  var sgn_num = num << 1;
+  if (num < 0) {
+    sgn_num = ~(sgn_num);
+  }
+  return(encodeNumber(sgn_num));
+}
+
+console.log(encodeSignedNumber(-3459553))
+</script>
+
+</body>
+</html>

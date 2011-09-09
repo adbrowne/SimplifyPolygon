@@ -28,6 +28,17 @@ class EncodePolygonSpec extends FlatSpec with ShouldMatchers {
     val result = PolygonEncode.encode(initial)
     result should equal("_p~iF~ps|U_ulLnnqC_mqNvxq`@")
   }
+
+  "Sydney" should "encode" in {
+    val initial = List(
+      new Point(-34.59553987981164, 151.09722811874997),
+      new Point(-32.41552637952531, 148.63629061874997),
+      new Point(-31.894665688451134, 152.96490389999997) ,
+    new Point(-34.55935707696108, 153.53619296249997)
+    )
+    val result = PolygonEncode.encode(initial)
+    result should equal("b}crEudfy[axhLzs_NkvdByllYhmgOqqnB")
+  }
 }
 
 }
