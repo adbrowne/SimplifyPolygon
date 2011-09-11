@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="620e3480-15e7-41b2-ba9a-787ffa27f418" name="Default" comment="Reformatted using idea">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/map/index.html" afterPath="$PROJECT_DIR$/map/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/PolygonEncode.scala" afterPath="$PROJECT_DIR$/src/main/scala/PolygonEncode.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/EncodePolygonTests.scala" afterPath="$PROJECT_DIR$/src/test/scala/EncodePolygonTests.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/JtsTests.scala" afterPath="$PROJECT_DIR$/src/test/scala/JtsTests.scala" />
-    </list>
+    <list default="true" id="620e3480-15e7-41b2-ba9a-787ffa27f418" name="Default" comment="Reformatted using idea" />
     <ignored path="SimplifyPolygon.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -521,7 +515,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32943925" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
