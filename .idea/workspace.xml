@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="620e3480-15e7-41b2-ba9a-787ffa27f418" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/test/scala/ReadDbfFileSpec.scala" />
+    <list default="true" id="620e3480-15e7-41b2-ba9a-787ffa27f418" name="Default" comment="Added dbf l">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/javadbf-0.4.0.jar" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/scala/ParallelToStringTest.scala" afterPath="$PROJECT_DIR$/src/main/scala/ParallelToStringTest.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/EncodePolygonTests.scala" afterPath="$PROJECT_DIR$/src/test/scala/EncodePolygonTests.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/test/scala/ReadShapeFileSpec.scala" afterPath="$PROJECT_DIR$/src/test/scala/ReadShapeFileSpec.scala" />
     </list>
     <ignored path="SimplifyPolygon.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -93,15 +90,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Simplify.scala" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/scala/Simplify.scala">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="11" selection-start="823" selection-end="823" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="ProcessFile.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/scala/ProcessFile.scala">
           <provider selected="true" editor-type-id="text-editor">
@@ -147,10 +135,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ReadDbfFileSpec.scala" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="ReadDbfFileSpec.scala" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/test/scala/ReadDbfFileSpec.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="11" column="24" selection-start="395" selection-end="395" vertical-scroll-proportion="0.2868526">
+            <state line="11" column="24" selection-start="395" selection-end="395" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="union.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/map/union.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -293,37 +290,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="SimplifyPolygon" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="SimplifyPolygon" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scala" />
+              <option name="myItemId" value="map" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -745,7 +712,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/test/scala/ReadDbfFileSpec.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="24" selection-start="395" selection-end="395" vertical-scroll-proportion="0.2868526">
+        <state line="11" column="24" selection-start="395" selection-end="395" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/map/union.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
