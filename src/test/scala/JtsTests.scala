@@ -53,7 +53,7 @@ class JtsSpec extends FlatSpec with ShouldMatchers {
       shape.parts map partToCoordinates
     }
     def coordinateToPoint(coord: Coordinate) = {
-      new Point(coord.x, coord.y)
+      new Point(coord.y, coord.x)
     }
     def geometryToPolygon(geom: Geometry) = {
       geom.getCoordinates() map coordinateToPoint
@@ -85,14 +85,15 @@ class JtsSpec extends FlatSpec with ShouldMatchers {
     def simplifyPolygon(points: List[Point], epsilon: Double) = {
       Simplify.simplify(points,epsilon)
     }
-    val simplifiedPolygons = polygons map(x => simplifyPolygon(x.toList, 0.05))
+    val simplifiedPolygons = polygons map(x => simplifyPolygon(x.toList, 0.2))
+    val encodedPolygons = simplifiedPolygons map PolygonEncode.encode
     import net.liftweb.json.JsonAST._
     import net.liftweb.json.Extraction._
     import net.liftweb.json.Printer._
     implicit val formats = net.liftweb.json.DefaultFormats
-    val outputFile = "./map/union.js"
+    val outputFile = "./map/union_encoded.js"
     printToFile(new java.io.File(outputFile))(p => {
-      p.write(pretty(render(decompose(simplifiedPolygons))))
+      p.write(pretty(render(decompose(encodedPolygons))))
     })
     //geoms.length should equal(3)
 

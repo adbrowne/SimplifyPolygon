@@ -1,3 +1,4 @@
+
 /*package net.hasnext.mapping{
   object ParallelToStringTest extends App {
     def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
