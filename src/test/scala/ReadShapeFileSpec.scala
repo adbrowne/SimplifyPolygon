@@ -4,6 +4,7 @@ package net.hasnext.mapping.tests {
 
 import net.hasnext.mapping._
 
+
 class ReadShapeFileSpec extends FlatSpec with ShouldMatchers {
   "LoadFile" should "to load file" in {
     val shapeFile = ShapeFileLoader.readFile("./data/australia/australia.shp")
