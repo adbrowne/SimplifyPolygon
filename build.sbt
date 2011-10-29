@@ -8,11 +8,9 @@ libraryDependencies += "org.scalatest" % "scalatest_2.9.0" % "1.6.1"
 
 libraryDependencies += "net.liftweb" % "lift-json_2.9.0" % "2.4-M3"
 
-seq(sbtassembly.Plugin.assemblySettings: _*)
-
   mainClass := Some("net.hasnext.mapping.ProcessFile")
 
-  scalaVersion := "2.9.0"
+  scalaVersion := "2.9.1"
 
   scalacOptions += "-deprecation"
 
