@@ -27,7 +27,7 @@ package net.hasnext.mapping{
     }
 
     def partToString(startComma: Boolean, part: Part, output: String => Unit) = {
-      val points = Simplify.simplify(part.points,0.005)
+      val points = Simplify.simplify(part.points,0.05)
         if(points.length > 3){
           if(startComma) output(",")
           output("""{
@@ -93,7 +93,7 @@ package net.hasnext.mapping{
         p.print("""{"shapes":[""")
         val shapeAction = writeShape(p)_
         val startTime = System.currentTimeMillis()
-          val inputFileName ="../erl-shapelib/aus_postcodes/POA06aAUST_region.shp"
+          val inputFileName ="./data/aus_postcodes/POA06aAUST_region.shp"
         val shapeFile = ShapeFileLoader.actionFile(inputFileName, shapeAction)
           val endTime = System.currentTimeMillis()
           p.print("""]}""")
