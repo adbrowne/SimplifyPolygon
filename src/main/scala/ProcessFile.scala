@@ -49,7 +49,8 @@ package net.hasnext.mapping{
       }
       def shapeToString(shape: Shape, output: String => Unit, recordData: Map[String,Object]) = {
         output ("""{ "recordNumber":""" + shape.recordNumber + """
-          "name":""" + recordData("POA_2006") + """ 
+          ,
+          "name":""" + '"' + recordData("POA_2006") + """" 
           ,
           "parts":[""")
 
@@ -77,8 +78,6 @@ package net.hasnext.mapping{
 
         shapeToString(shape, p.print, recordData(recordNum - 1))
       }
-      Console.println("Press enter to start2")
-      Console.readLine
       val file = new java.io.File("./map/all_0_05.js")
         val p = new java.io.PrintWriter(file)
         try { 
