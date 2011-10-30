@@ -5,14 +5,13 @@ package net.hasnext.mapping {
   import java.io.{FileInputStream, InputStream}
 
   class DbfReader(fileName: String) {
+    class ReaderImpl(reader : DBFReader){
     def getFieldName(
-      reader: DBFReader,
       index: Int) = {
         val field : DBFField = reader.getField(index)
         field.getName().trim() 
     }
     def getFieldNames(
-      reader: DBFReader, 
       index: Int, 
       total: Int, 
       fieldNames: List[String]) 
@@ -21,17 +20,17 @@ package net.hasnext.mapping {
         fieldNames.reverse
       }
       else{
-        val name = getFieldName(reader, index)
-        getFieldNames(reader, index + 1, total, name :: fieldNames)
+        val name = getFieldName(index)
+        getFieldNames(index + 1, total, name :: fieldNames)
       }
     }
 
-    def getFieldNames(reader: DBFReader) : List[String] = {
+    def getFieldNames() : List[String] = {
       val numberOfFields = reader.getFieldCount();
-      getFieldNames(reader, 0, numberOfFields, List())
+      getFieldNames(0, numberOfFields, List())
     }
 
-    def getRows(reader: DBFReader, fieldNames: List[String]) : List[Map[String, Object]] = {
+    def getRows(fieldNames: List[String]) : List[Map[String, Object]] = {
       var rows : List[Map[String, Object]] = List()
         var rowObjects : Array[Object] = Array()
         while( rowObjects != null) {
@@ -51,13 +50,16 @@ package net.hasnext.mapping {
       rows.reverse
     }
     def read = {
+
+      val fieldNames = getFieldNames()
+
+        getRows(fieldNames)
+    }
+    }
+    def read = {
       var inputStream = new FileInputStream(fileName);
       var reader = new DBFReader(inputStream);
-
-      val fieldNames = getFieldNames(reader)
-
-        getRows(reader, fieldNames)
-
+      (new ReaderImpl(reader)).read
     }
   }
 }
