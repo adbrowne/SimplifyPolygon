@@ -47,8 +47,9 @@ package net.hasnext.mapping{
           false
         }
       }
-      def shapeToString(shape: Shape, output: String => Unit) = {
+      def shapeToString(shape: Shape, output: String => Unit, recordData: Map[String,Object]) = {
         output ("""{ "recordNumber":""" + shape.recordNumber + """
+          "name":""" + recordData("POA_2006") + """ 
           ,
           "parts":[""")
 
@@ -70,20 +71,11 @@ package net.hasnext.mapping{
       def writeString(stream: java.io.BufferedOutputStream)(string: String) {
         stream.write(string.getBytes())
       }
-      def writeFile(recordNum: Int, shape: Shape) {
-        //val outputString = shapeToString(shape)
-
-        val outputFile = "./map/all_0_05.js"
-        printToFile(new java.io.File(outputFile))(p => {
-            shapeToString(shape, p.print)
-            //p.println(outputString)
-          })
-      }
-      def writeShape(p: java.io.PrintWriter)(recordNum: Int, shape: Shape){
+      def writeShape(p: java.io.PrintWriter, recordData: List[Map[String, Object]])(recordNum: Int, shape: Shape){
         if(recordNum > 1)
           p.print(",")
 
-        shapeToString(shape, p.print)
+        shapeToString(shape, p.print, recordData(recordNum - 1))
       }
       Console.println("Press enter to start2")
       Console.readLine
@@ -91,7 +83,9 @@ package net.hasnext.mapping{
         val p = new java.io.PrintWriter(file)
         try { 
         p.print("""{"shapes":[""")
-        val shapeAction = writeShape(p)_
+        val dbfFileName = "./data/aus_postcodes/POA06aAUST_region.dbf"
+        val recordData = (new DbfReader(dbfFileName).read)
+        val shapeAction = writeShape(p, recordData)_
         val startTime = System.currentTimeMillis()
           val inputFileName ="./data/aus_postcodes/POA06aAUST_region.shp"
         val shapeFile = ShapeFileLoader.actionFile(inputFileName, shapeAction)
