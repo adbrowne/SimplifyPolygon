@@ -6,6 +6,7 @@ package net.hasnext.mapping {
 
   class DbfReader(fileName: String) {
     class ReaderImpl(reader : DBFReader){
+      val fieldNames = getFieldNames()
     def getFieldName(
       index: Int) = {
         val field : DBFField = reader.getField(index)
@@ -30,7 +31,7 @@ package net.hasnext.mapping {
       getFieldNames(0, numberOfFields, List())
     }
 
-    def getRows(fieldNames: List[String]) : List[Map[String, Object]] = {
+    def getRows() : List[Map[String, Object]] = {
       var rows : List[Map[String, Object]] = List()
         var rowObjects : Array[Object] = Array()
         while( rowObjects != null) {
@@ -51,9 +52,8 @@ package net.hasnext.mapping {
     }
     def read = {
 
-      val fieldNames = getFieldNames()
 
-        getRows(fieldNames)
+        getRows()
     }
     }
     def read = {
