@@ -46,6 +46,12 @@ class ReadShapeFileSpec extends FlatSpec with ShouldMatchers {
         new Point(148.7672119140625, -35.92083740234375),
         new Point(149.40692138671875, -35.139442443847656)))
   }
+  "First shape" should "have a center" in {
+    val shapeFile = ShapeFileLoader.readFile("./data/australia/australia.shp")
+    val firstShape = shapeFile.shapes.head
+    firstShape.center should equal(
+        new Point(148.7672119140625, -35.92083740234375))
+  }
   "First shape" should "should have 1 parts" in {
     val shapeFile = ShapeFileLoader.readFile("./data/australia/australia.shp")
     val firstShape = shapeFile.shapes.head
