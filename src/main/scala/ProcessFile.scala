@@ -4,7 +4,19 @@ package net.hasnext.mapping{
       val p = new java.io.PrintWriter(f)
         try { op(p) } finally { p.close() }
     }
-    def pointToString(point: Point, output: String => Unit) = {
+    def pointToString(point: Point) = {
+
+      """{
+          "X":""" + 
+        ("%1.2f" format point.x) + 
+        (""",
+          "Y":""")  + 
+        ("%1.2f" format point.y) + 
+        ( """
+        }""" )
+
+    }    
+    def outputPoint(point: Point, output: String => Unit) = {
       output("""{
           "X":""")
         output("%1.2f" format point.x)
@@ -27,7 +39,7 @@ package net.hasnext.mapping{
     }
 
     def partToString(startComma: Boolean, part: Part, output: String => Unit) = {
-      val points = Simplify.simplify(part.points,0.05)
+      val points = Simplify.simplify(part.points,0.1)
         if(points.length > 3){
           if(startComma) output(",")
           output("""{
@@ -37,7 +49,7 @@ package net.hasnext.mapping{
           points.foreach(
             s => {
               if(!first) output(",")
-                pointToString(s,output) 
+                outputPoint(s,output) 
               first = false
             })
           output("]}")
@@ -50,7 +62,9 @@ package net.hasnext.mapping{
       def shapeToString(shape: Shape, output: String => Unit, recordData: Map[String,Object]) = {
         output ("""{ "recordNumber":""" + shape.recordNumber + """
           ,
-          "name":""" + '"' + recordData("POA_2006") + """" 
+          "name":""" + '"' + recordData("POA_2006") + """"
+          ,
+          "center":""" + pointToString(shape.center) + """ 
           ,
           "parts":[""")
 
