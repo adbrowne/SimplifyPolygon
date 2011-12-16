@@ -35,69 +35,78 @@ package net.hasnext.mapping.tests {
     "Segment" should "maintain point order" in {
       Segment((0,0),(0,1)).points.head should equal (MapPoint(0,0))
     }
+
+    "Segment" should "be split by another segment" in {
+      val segment = Segment((0,0),(0,1),(1,1),(1,0))
+      val subSegment = Segment((0,1),(1,1))
+
+      segment.splitBySegment(subSegment) should equal (List(Segment((0,0)), subSegment, Segment((1,0))))
+    }
+    
+    "Segment" should "be split by another segment when segment is at the start" in {
+      val segment = Segment((0,0),(0,1),(1,1),(1,0))
+      val subSegment = Segment((0,0),(0,1))
+
+      segment.splitBySegment(subSegment) should equal (List(subSegment, Segment((1,1),(1,0))))
+    }
+    
+    "Segment" should "be split by another segment when segment is at the end" in {
+      val segment = Segment((0,0),(0,1),(1,1),(1,0))
+      val subSegment = Segment((1,1),(1,0))
+
+      segment.splitBySegment(subSegment) should equal (List(Segment((0,0),(0,1)), subSegment))
+    }
+
+    "Segment" should "remain the same when subsegment does not match" in {
+      val segment = Segment((0,0),(0,1),(1,1),(1,0))
+      val subSegment = Segment((2,2),(3,3))
+
+      segment.splitBySegment(subSegment) should equal (List(segment))
+    }
   }
 
   class MapRegionSpec extends FlatSpec with ShouldMatchers 
   {
     "MapRegion" should "create segments" in {
       val segment = Segment((0,0),(0,1),(1,1),(1,0))
-        val shape = new MapRegion(List(segment))
+      val shape = new MapRegion(List(segment))
 
-        shape.segments.head should equal (segment) 
+      shape.segments.head should equal (segment) 
     }
 
     "MapRegion" should "be created by tuples" in {
 
       val region = MapRegion((0,0),(0,1),(1,1),(1,0))
     }
+
+/*    "MapRegion" should "be reduced when combined with another" in {
+
+      val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
+      val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
+
+      var square1_segmented = square1.findCommonSegments(square2)
+
+      square1_segmented.segments should equal (2)
+    } */
   }
 
   class LcsSpec extends FlatSpec with ShouldMatchers
   {
-    def longestCommonSubstring[A](list1: Seq[A], list2: Seq[A]) : Seq[A] = {
-      // adapted from the haskell implementation here: 
-      // http://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Longest_common_substring
-      
-      def g[A](z: Seq[A], xy: Tuple2[A,A]) = {
-        xy match {
-          case (x,y) => if(x == y){
-                          z ++ List(x)
-                        }
-                        else{
-                          List()
-                        }
-        }
-      }
-      def f[A](xs: Seq[A], ys: Seq[A]) = {
-        xs.zip(ys).scanLeft(Seq[A]())(g)
-      }
-      val substrings = (for(xs <- list1.tails; ys <- list2.tails.drop(1))
-            yield(f(xs,list2) ++ f(list1,ys))).flatten
-
-      substrings.foldLeft(Seq[A]())(
-        (currentLongest, x) => {
-          if(x.length > currentLongest.length){
-            x
-          }
-          else{
-            currentLongest
-          }
-        })
-    }
     "No subsequence" should "return empty seq" in {
-      longestCommonSubstring(List(1,2,3), List(4,5)) should equal (List()) 
+      Utility.longestCommonSubstring(List(1,2,3), List(4,5)) should equal (List()) 
     }
     "Single element" should "return single element" in {
-      longestCommonSubstring(List(1,2,3), List(3,4,5)) should equal (List(3)) 
+     Utility.longestCommonSubstring(List(1,2,3), List(3,4,5)) should equal (List(3)) 
     }
     "Two element" should "return two elements" in {
-      longestCommonSubstring(List(4,5,6), List(3,4,5)) should equal (List(4,5)) 
+     Utility.longestCommonSubstring(List(4,5,6), List(3,4,5)) should equal (List(4,5)) 
     }
   }
   class CommonSegmentSpec extends FlatSpec with ShouldMatchers
   {
     def segmentOverlaps(segment1: Segment, segment2: Segment) = {
-      Segment((0,0), (0,1))
+      val lcs = Utility.longestCommonSubstring(segment1.points, segment2.points)
+      new Segment(lcs)
     }
 
     "CommonSegment" should "identify common segments" in {
