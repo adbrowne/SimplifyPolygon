@@ -90,7 +90,9 @@ package net.hasnext.mapping{
       val extract = Utility.longestCommonSubstring(segments.head.points, otherRegion.segments.head.points)    
       extract match {
         case Seq() => this;
-        case xs => new MapRegion(List(new Segment(extract)))
+        case xs => new MapRegion(
+          segments.map(x => x.splitBySegment(new Segment(extract))).flatten
+        )
       }
     }
     def this() = this(List())
@@ -102,10 +104,31 @@ package net.hasnext.mapping{
       new MapRegion(List(new Segment(points map (x => MapPoint(x)))))
     }
   }
-  class PolyMap(val shapes: List[MapRegion]){
+  class PolyMap(pShapes: List[MapRegion]){
+    val shapes : List[MapRegion] = {
+      for(shape1 <- pShapes ;  shape2 <- pShapes)
+        yield pShapes.foldLeft(shape1)(
+          (z,x) => 
+          {
+            if(z != x){
+              z.findCommonSegments(x)
+            }
+            else{
+              z
+            }
+          }
+        )
+    }
+    
     def this() = this(List())
-      def addShape(shape: MapRegion) : PolyMap = {
+    
+    def addShape(shape: MapRegion) : PolyMap = {
       new PolyMap(shape::shapes)
+    }
+
+    def segments = {
+      (for(shape <- shapes)
+        yield shape.segments).flatten.toSet.toSeq
     }
   }
 }

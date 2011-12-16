@@ -12,14 +12,15 @@ package net.hasnext.mapping.tests {
         mapWithOneShape.shapes.length should equal (1)
     }
 
-    /*"Add two shapes" should "share segments" in {
-      val square1 = new MapRegion((0,0),(0,1),(1,1),(1,0))
-        val square2 = new MapRegion(Lis((0,0),(0,1),(-1,1),(-1,0)))
+    "Add two shapes" should "share segments" in {
+        val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
+        val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
 
         val map = new PolyMap(List(square1, square2))
 
+        
         map.segments.length should equal (3)
-    }*/
+    }
   }
 
   class SegmentSpec extends FlatSpec with ShouldMatchers
@@ -79,15 +80,25 @@ package net.hasnext.mapping.tests {
       val region = MapRegion((0,0),(0,1),(1,1),(1,0))
     }
 
-/*    "MapRegion" should "be reduced when combined with another" in {
+    "MapRegion" should "be reduced when combined with another" in {
 
       val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
       val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
 
       var square1_segmented = square1.findCommonSegments(square2)
 
-      square1_segmented.segments should equal (2)
-    } */
+      square1_segmented.segments.length should equal (2)
+    } 
+    
+    "MapRegion" should "be stay the same when combined with another that has no overlap" in {
+
+      val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
+      val square2 = MapRegion((3,3),(3,2),(-2,2),(-2,3))
+
+      var square1_segmented = square1.findCommonSegments(square2)
+
+      square1_segmented.segments.length should equal (1)
+    } 
   }
 
   class LcsSpec extends FlatSpec with ShouldMatchers
