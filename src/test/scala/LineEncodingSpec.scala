@@ -84,6 +84,9 @@ package net.hasnext.mapping.tests {
           }
         })
     }
+    "No subsequence" should "return empty seq" in {
+      longestCommonSubstring(List(1,2,3), List(4,5)) should equal (List()) 
+    }
     "Single element" should "return single element" in {
       longestCommonSubstring(List(1,2,3), List(3,4,5)) should equal (List(3)) 
     }
