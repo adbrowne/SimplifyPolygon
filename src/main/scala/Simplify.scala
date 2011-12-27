@@ -42,5 +42,9 @@ package net.hasnext.mapping{
         }
       }
     }
+
+    def simplify(line: Seq[MapPoint], epsilon: Double) : Seq[MapPoint] = {
+      simplify(line.map(x => new Point(x.x, x.y)).toList, epsilon).map(x=> MapPoint(x.x.toFloat,x.y.toFloat))
+    }
   }
 }

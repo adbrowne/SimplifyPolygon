@@ -1,0 +1,67 @@
+<html>
+  <head><title>Test Map</title>
+    <style type="text/css">
+        .black {
+            background-color: Black;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map_canvas {
+            height: 100%;
+        }
+
+        #feedback {
+            font-size: 1.4em;
+        }
+
+        #canvas {
+            height: 300px;
+            left: 50%;
+            margin: -150px 0 0 -300px;
+            position: absolute;
+            top: 50%;
+            width: 600px;
+        }
+
+        #paper {
+            height: 300px;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 300px;
+        }
+
+        #nsw, #vic, #wa, #sa, #nt, #qld, #tas {
+            display: none;
+            height: 400px;
+            overflow: auto;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 300px;
+        }
+
+        .selectbox-helper {
+            border: 1px dotted black;
+            position: absolute;
+            z-index: 100;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div> 
+    <script src="jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="raphael-min.js" type="text/javascript"></script>
+    <script src="underscore-min.js" type="text/javascript"></script>
+    <script src="drawMap.js" type="text/javascript"></script>
+  </body>
+</html>

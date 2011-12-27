@@ -124,11 +124,29 @@ package net.hasnext.mapping{
       }
         shapeToScalaList(shape, p.print, postcode);
     }
+  
+    def addShapeToMap(shape: Shape, myMap: PolyMap) = {
+      println(shape.parts.length);
+      var map = myMap
+      shape.parts.foreach(p => {
+          map = map.addShape(
+        new MapRegion(List(new Segment(p.points.map(x => {
+          new MapPoint(x.x.toFloat,x.y.toFloat) 
+          })))))
+        });
 
-    val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
-    val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
+      map
+    }
 
-    val map = new PolyMap(List(square1, square2))
+    val myShapes = ShapeFileLoader.readFile("data/aus_postcodes/POA06aAUST_region.shp")
+
+    
+    var map = new PolyMap()
+
+    map = addShapeToMap(myShapes.shapes(1),map)
+    map = addShapeToMap(myShapes.shapes(2),map)
+    map = addShapeToMap(myShapes.shapes(3),map)
+    
 
     val segmentMap : Map[Segment,Int] = map.segments.zipWithIndex.map(x => {
         x match {
@@ -140,7 +158,7 @@ package net.hasnext.mapping{
         x match {
           case (segment, index) => 
             new net.hasnext.mapping.js.Segment(index, 
-              segment.points.map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
+              Simplify.simplify(segment.points,0.01).map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
             )
         }
     }).toSeq;

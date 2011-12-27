@@ -32,7 +32,26 @@ package net.hasnext.mapping{
     }
 
   }
+
   case class MapPoint(val x: Float, val y: Float)
+  {
+    override def toString = "(" + x + "," + y + ")"
+    override def hashCode = 41 * (41 + x.toInt) + y.toInt
+  
+    val tolerance = 0.00001
+
+    def withinTolerance(left: Float,right: Float) = {
+      math.abs(left - right) < tolerance
+    }
+    override def equals(other: Any) = other match {
+      case that: MapPoint =>
+      (that canEqual this) &&
+      (withinTolerance(this.x, that.x)) && (withinTolerance(this.y,that.y))
+      case _ =>
+      false
+    }
+    def canEqual(other: Any) = other.isInstanceOf[MapPoint]
+  }
 
   object MapPoint {
     def apply(point: Tuple2[Int,Int]) = {
@@ -107,7 +126,7 @@ package net.hasnext.mapping{
   
   class PolyMap(pShapes: List[MapRegion]){
     val shapes : List[MapRegion] = {
-      for(shape1 <- pShapes ;  shape2 <- pShapes)
+      for(shape1 <- pShapes)
         yield pShapes.foldLeft(shape1)(
           (z,x) => 
           {
