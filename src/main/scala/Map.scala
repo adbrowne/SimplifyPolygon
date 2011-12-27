@@ -104,6 +104,7 @@ package net.hasnext.mapping{
       new MapRegion(List(new Segment(points map (x => MapPoint(x)))))
     }
   }
+  
   class PolyMap(pShapes: List[MapRegion]){
     val shapes : List[MapRegion] = {
       for(shape1 <- pShapes ;  shape2 <- pShapes)

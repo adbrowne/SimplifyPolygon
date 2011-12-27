@@ -1,0 +1,1 @@
+{"segments":[{"id":0,"points":[{"x":0.0,"y":0.0},{"x":0.0,"y":1.0}]},{"id":1,"points":[{"x":1.0,"y":1.0},{"x":1.0,"y":0.0}]},{"id":2,"points":[{"x":-1.0,"y":1.0},{"x":-1.0,"y":0.0}]}],"regions":[{"name":"RegionName","segments":[0,1]},{"name":"RegionName","segments":[0,1]},{"name":"RegionName","segments":[0,2]},{"name":"RegionName","segments":[0,2]}]}

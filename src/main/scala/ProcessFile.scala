@@ -1,3 +1,9 @@
+package net.hasnext.mapping.js{
+  case class Point(x: Float, y: Float);
+  case class Segment(id: Int, points: Seq[Point])
+  case class Region(name: String, segments: Seq[Int])
+  case class Map(segments: Seq[Segment], regions: Seq[Region])
+}
 package net.hasnext.mapping{
   object ProcessFile extends App {
     def printToFile(f: java.io.File)(op: java.io.PrintWriter => Unit) {
@@ -7,7 +13,7 @@ package net.hasnext.mapping{
     def pointToString(point: Point) = {
 
       """{
-          "X":""" + 
+        "X":""" + 
         ("%1.2f" format point.x) + 
         (""",
           "Y":""")  + 
@@ -41,7 +47,7 @@ package net.hasnext.mapping{
     def partToString(startComma: Boolean, part: Part, output: String => Unit) = {
       val points = Simplify.simplify(part.points,0.1)
         if(points.length > 3){
-          if(startComma) output(",")
+        if(startComma) output(",")
           output("""{
             "points":[""") 
 
@@ -59,55 +65,105 @@ package net.hasnext.mapping{
           false
         }
       }
-      def shapeToString(shape: Shape, output: String => Unit, recordData: Map[String,Object]) = {
-        output ("""{ "recordNumber":""" + shape.recordNumber + """
-          ,
-          "name":""" + '"' + recordData("POA_2006") + """"
-          ,
-          "center":""" + pointToString(shape.center) + """ 
-          ,
-          "parts":[""")
-
-        var first = true
+      def shapeToScalaList(shape: Shape, output: String => Unit, postcode: Object) = {
         shape.parts.foreach(
           s => {
-            val printed = partToString(!first, s,output) 
-              if(printed)
-              first = false
-          })
+            output("\n" + postcode.toString)
+            output(":\n")
+            s.points.foreach(
+              p => {
+                output("(" + p.x + "," + p.y + ")")
+              }
+            )
+            
+        })
+    }
 
-        output ("]}")
-      }
-      import net.liftweb.json.JsonAST._
-      import net.liftweb.json.Extraction._
-      import net.liftweb.json.Printer._
-      implicit val formats = net.liftweb.json.DefaultFormats
 
-      def writeString(stream: java.io.BufferedOutputStream)(string: String) {
-        stream.write(string.getBytes())
-      }
-      def writeShape(p: java.io.PrintWriter, recordData: List[Map[String, Object]])(recordNum: Int, shape: Shape){
-        if(recordNum > 1)
-          p.print(",")
+    def shapeToString(shape: Shape, output: String => Unit, recordData: Map[String,Object]) = {
+      output ("""{ "recordNumber":""" + shape.recordNumber + """
+        ,
+        "name":""" + '"' + recordData("POA_2006") + """"
+        ,
+        "center":""" + pointToString(shape.center) + """ 
+        ,
+        "parts":[""")
 
-        shapeToString(shape, p.print, recordData(recordNum - 1))
+      var first = true
+      shape.parts.foreach(
+        s => {
+          val printed = partToString(!first, s,output) 
+            if(printed)
+            first = false
+        })
+
+      output ("]}")
+    }
+    import net.liftweb.json.JsonAST._
+    import net.liftweb.json.Extraction._
+    import net.liftweb.json.Printer._
+    implicit val formats = net.liftweb.json.DefaultFormats
+
+    def writeString(stream: java.io.BufferedOutputStream)(string: String) {
+      stream.write(string.getBytes())
+    }
+    def writeShape(p: java.io.PrintWriter, recordData: List[Map[String, Object]])(recordNum: Int, shape: Shape){
+      if(recordNum > 1)
+        p.print(",")
+
+      shapeToString(shape, p.print, recordData(recordNum - 1))
+    }
+    def getMapRegion(shape: Shape) = {
+      
+    }
+    def writeBendigo(p: java.io.PrintWriter, recordData: List[Map[String, Object]])(recordNum: Int, shape: Shape){
+      var postcode = recordData(recordNum - 1)("POA_2006");
+      if(postcode == "3551" || postcode == "3550")
+      {
+
       }
-      val file = new java.io.File("./map/all_0_05.js")
-        val p = new java.io.PrintWriter(file)
-        try { 
-        p.print("""{"shapes":[""")
-        val dbfFileName = "./data/aus_postcodes/POA06aAUST_region.dbf"
-        val recordData = (new DbfReader(dbfFileName).read)
-        val shapeAction = writeShape(p, recordData)_
-        val startTime = System.currentTimeMillis()
-          val inputFileName ="./data/aus_postcodes/POA06aAUST_region.shp"
-        val shapeFile = ShapeFileLoader.actionFile(inputFileName, shapeAction)
-          val endTime = System.currentTimeMillis()
-          p.print("""]}""")
-        Console.println(endTime - startTime)
-      }
-      finally { 
-        p.close() 
-      }
+        shapeToScalaList(shape, p.print, postcode);
+    }
+
+    val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
+    val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
+
+    val map = new PolyMap(List(square1, square2))
+
+    val segmentMap : Map[Segment,Int] = map.segments.zipWithIndex.map(x => {
+        x match {
+          case (segment, index) => (segment -> index)
+        }
+      }).toMap;
+
+    val segments = segmentMap.map(x => {
+        x match {
+          case (segment, index) => 
+            new net.hasnext.mapping.js.Segment(index, 
+              segment.points.map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
+            )
+        }
+    }).toSeq;
+
+    val regions = map.shapes.map(x => {
+        var segmentIds = x.segments.map(s => 
+          {
+            segmentMap(s)
+          });
+
+      new net.hasnext.mapping.js.Region("RegionName",segmentIds)
+    });
+
+    val jsMap = new net.hasnext.mapping.js.Map(segments,regions)
+    val stringOut = net.liftweb.json.Serialization.write(jsMap)
+
+    val file = new java.io.File("./map/lineEncoded/lineencoded.js")
+    val p = new java.io.PrintWriter(file)
+    try { 
+      p.print(stringOut)
+    }
+    finally { 
+      p.close() 
     }
   }
+}
