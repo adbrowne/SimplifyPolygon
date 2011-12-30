@@ -158,7 +158,8 @@ package net.hasnext.mapping{
         x match {
           case (segment, index) => 
             new net.hasnext.mapping.js.Segment(index, 
-              Simplify.simplify(segment.points,0.01).map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
+              //Simplify.simplify(segment.points,0.001).map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
+              segment.points.map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
             )
         }
     }).toSeq;

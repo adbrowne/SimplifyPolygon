@@ -6,8 +6,8 @@
     yMax: undefined
   }
 
-  var width = 600;
-  var height = 300;
+  var width = 1200;
+  var height = 500;
 
   var paper = Raphael(2, 2, width, height);
 
