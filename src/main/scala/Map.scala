@@ -33,14 +33,14 @@ package net.hasnext.mapping{
 
   }
 
-  case class MapPoint(val x: Float, val y: Float)
+  case class MapPoint(val x: Double, val y: Double)
   {
     override def toString = "(" + x + "," + y + ")"
     override def hashCode = 41 * (41 + x.toInt) + y.toInt
   
     val tolerance = 0.00001
 
-    def withinTolerance(left: Float,right: Float) = {
+    def withinTolerance(left: Double,right: Double) = {
       math.abs(left - right) < tolerance
     }
     override def equals(other: Any) = other match {
@@ -54,7 +54,7 @@ package net.hasnext.mapping{
   }
 
   object MapPoint {
-    def apply(point: Tuple2[Int,Int]) = {
+    def apply(point: Tuple2[Double,Double]) = {
       point match {
         case (x,y) => new MapPoint(x,y)
       }
@@ -100,7 +100,7 @@ package net.hasnext.mapping{
   }
 
   object Segment {
-    def apply(points: Tuple2[Int,Int]*) = {
+    def apply(points: Tuple2[Double,Double]*) = {
       new Segment(points map (x=> MapPoint(x))) 
     }
   }
@@ -118,7 +118,7 @@ package net.hasnext.mapping{
   }
 
   object MapRegion{
-    def apply(points: Tuple2[Int,Int]*) = {
+    def apply(points: Tuple2[Double,Double]*) = {
       // TODO: Fix the duplication here. Should be able to call the segment singleton constructor
       new MapRegion(List(new Segment(points map (x => MapPoint(x)))))
     }

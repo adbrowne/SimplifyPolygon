@@ -1,5 +1,5 @@
 package net.hasnext.mapping.js{
-  case class Point(x: Float, y: Float);
+  case class Point(x: Double, y: Double);
   case class Segment(id: Int, points: Seq[Point])
   case class Region(name: String, segments: Seq[Int])
   case class Map(segments: Seq[Segment], regions: Seq[Region])
@@ -146,7 +146,14 @@ package net.hasnext.mapping{
     map = addShapeToMap(myShapes.shapes(1),map)
     map = addShapeToMap(myShapes.shapes(2),map)
     map = addShapeToMap(myShapes.shapes(3),map)
-    
+
+    val incriment = 0.0005;
+    val origin = MapPoint(151.18,-33.88)
+    map = map.addShape(MapRegion(
+      (origin.x,origin.y),
+      (origin.x + incriment,origin.y),
+      (origin.x + incriment,origin.y + incriment),
+      (origin.x, origin.y + incriment)));
 
     val segmentMap : Map[Segment,Int] = map.segments.zipWithIndex.map(x => {
         x match {
