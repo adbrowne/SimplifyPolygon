@@ -1,8 +1,8 @@
 package net.hasnext.mapping.js{
   case class Point(x: Double, y: Double);
-  case class PointSegment(id: Int, points: Seq[Point])
-  case class Region(name: String, PointSegments: Seq[Int])
-  case class Map(PointSegments: Seq[PointSegment], regions: Seq[Region])
+  case class Segment(id: Int, points: Seq[Point])
+  case class Region(name: String, segments: Seq[Int])
+  case class Map(segments: Seq[Segment], regions: Seq[Region])
 }
 package net.hasnext.mapping{
   object ProcessFile extends App {
@@ -130,9 +130,9 @@ package net.hasnext.mapping{
       var map = myMap
       shape.parts.foreach(p => {
           map = map.addShape(
-        new MapRegion(List(new PointSegment(p.points.map(x => {
+        new PointSegment(p.points.map(x => {
           new MapPoint(x.x.toFloat,x.y.toFloat) 
-          })))))
+          })), "Unknown Name")
         });
 
       map
@@ -149,35 +149,34 @@ package net.hasnext.mapping{
 
     val incriment = 0.0005;
     val origin = MapPoint(151.18,-33.88)
-    map = map.addShape(MapRegion(
-      (origin.x,origin.y),
-      (origin.x + incriment,origin.y),
-      (origin.x + incriment,origin.y + incriment),
-      (origin.x, origin.y + incriment)));
+    map = map.addShape(new PointSegment(0,
+      List(MapPoint(origin.x,origin.y),
+      MapPoint(origin.x + incriment,origin.y),
+      MapPoint(origin.x + incriment,origin.y + incriment),
+      MapPoint(origin.x, origin.y + incriment))), "Unit Object");
 
-    val pointSegmentMap : Map[PointSegment,Int] = map.segments.zipWithIndex.map(x => {
+    /*
+    val pointSegmentMap : Map[Segment,Int] = map.segments.zipWithIndex.map(x => {
         x match {
           case (pointSegment, index) => (pointSegment -> index)
         }
       }).toMap;
-
-    val pointSegments = pointSegmentMap.map(x => {
-        x match {
-          case (pointSegment, index) => 
-            new net.hasnext.mapping.js.PointSegment(index, 
+*/
+    val pointSegments = map.leafSegments.map((x : PointSegment) => {
+          new net.hasnext.mapping.js.Segment(x.id, 
               //Simplify.simplify(PointSegment.points,0.001).map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
-              pointSegment.points.map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
+              //x.points.map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
+              Simplify.simplify(x.points,0.001).map(p => new net.hasnext.mapping.js.Point(p.x,p.y)) 
             )
-        }
     }).toSeq;
 
     val regions = map.shapes.map(x => {
-        var pointSegmentIds = x.segments.map(s => 
+        var pointSegmentIds = map.getSegment(x.segmentId).leafSegments.map(s => 
           {
-            pointSegmentMap(s)
+            s.id
           });
 
-      new net.hasnext.mapping.js.Region("RegionName",pointSegmentIds)
+      new net.hasnext.mapping.js.Region(x.name, pointSegmentIds)
     });
 
     val jsMap = new net.hasnext.mapping.js.Map(pointSegments,regions)
@@ -190,6 +189,6 @@ package net.hasnext.mapping{
     }
     finally { 
       p.close() 
-    }
+    } 
   }
 }
