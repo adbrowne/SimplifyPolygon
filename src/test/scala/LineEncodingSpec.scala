@@ -12,7 +12,7 @@ package net.hasnext.mapping.tests {
         mapWithOneShape.shapes.length should equal (1)
     }
 
-    "Add two shapes" should "share segments" in {
+    "Add two shapes" should "share PointSegments" in {
         val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
         val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
 
@@ -23,53 +23,66 @@ package net.hasnext.mapping.tests {
     }
   }
 
-  class SegmentSpec extends FlatSpec with ShouldMatchers
+  class PointSegmentSpec extends FlatSpec with ShouldMatchers
   {
-    "Segment" should "be equal if points are the same" in {
-      Segment((0,0),(0,1)) should equal (Segment((0,0),(0,1)))
+    "PointSegment" should "be equal if points are the same" in {
+      PointSegment((0,0),(0,1))  equivalentTo (PointSegment((0,0),(0,1))) should equal (true)
     }
 
-    "Segment" should "return the two points for a two point segment" in {
-      Segment((0,0),(0,1)).points.length should equal (2)
-    }
-    
-    "Segment" should "maintain point order" in {
-      Segment((0,0),(0,1)).points.head should equal (MapPoint(0,0))
-    }
-
-    "Segment" should "be split by another segment" in {
-      val segment = Segment((0,0),(0,1),(1,1),(1,0))
-      val subSegment = Segment((0,1),(1,1))
-
-      segment.splitBySegment(subSegment) should equal (List(Segment((0,0)), subSegment, Segment((1,0))))
+    "PointSegment" should "return the two points for a two point PointSegment" in {
+      PointSegment((0,0),(0,1)).points.length should equal (2)
     }
     
-    "Segment" should "be split by another segment when segment is at the start" in {
-      val segment = Segment((0,0),(0,1),(1,1),(1,0))
-      val subSegment = Segment((0,0),(0,1))
+    "PointSegment" should "maintain point order" in {
+      PointSegment((0,0),(0,1)).points.head should equal (MapPoint(0,0))
+    }
 
-      segment.splitBySegment(subSegment) should equal (List(subSegment, Segment((1,1),(1,0))))
+    "PointSegment" should "be split by another PointSegment" in {
+      val segment = PointSegment((0,0),(0,1),(1,1),(1,0))
+      val subPointSegment = PointSegment((0,1),(1,1))
+
+      segmentListsEqual(segment.splitByPointSegment(subPointSegment) , (List(PointSegment((0,0)), subPointSegment, PointSegment((1,0))))) should equal (true)
+    }
+   
+    def segmentListsEqual(left : List[PointSegment], right: List[PointSegment]) = {
+      if(left.length != right.length)
+      {
+        false
+      }
+      else{
+        val zipped = left zip right
+        zipped forall(z => z match{
+            case(x,y) => x equivalentTo y
+            })
+      }
+    }
+
+    "PointSegment" should "be split by another PointSegment when PointSegment is at the start" in {
+      val segment = PointSegment((0,0),(0,1),(1,1),(1,0))
+      val subPointSegment = PointSegment((0,0),(0,1))
+
+      segmentListsEqual(segment.splitByPointSegment(subPointSegment),    (List(subPointSegment, PointSegment((1,1),(1,0))))) should equal (true)
     }
     
-    "Segment" should "be split by another segment when segment is at the end" in {
-      val segment = Segment((0,0),(0,1),(1,1),(1,0))
-      val subSegment = Segment((1,1),(1,0))
+    "PointSegment" should "be split by another PointSegment when PointSegment is at the end" in {
+      val segment = PointSegment((0,0),(0,1),(1,1),(1,0))
+      val subPointSegment = PointSegment((1,1),(1,0))
 
-      segment.splitBySegment(subSegment) should equal (List(Segment((0,0),(0,1)), subSegment))
+      segmentListsEqual(segment.splitByPointSegment(subPointSegment) , (List(PointSegment((0,0),(0,1)), subPointSegment))) should equal (true)
     }
 
-    "Segment" should "remain the same when subsegment does not match" in {
-      val segment = Segment((0,0),(0,1),(1,1),(1,0))
-      val subSegment = Segment((2,2),(3,3))
+    "PointSegment" should "remain the same when subPointSegment does not match" in {
+      val segment = PointSegment((0,0),(0,1),(1,1),(1,0))
+      val subPointSegment = PointSegment((2,2),(3,3))
 
-      segment.splitBySegment(subSegment) should equal (List(segment))
+      segment.splitByPointSegment(subPointSegment) should equal (List(segment))
     }
   }
 
   class MapRegionSpec extends FlatSpec with ShouldMatchers 
   {
-    "MapRegion" should "create segments" in {
-      val segment = Segment((0,0),(0,1),(1,1),(1,0))
+    "MapRegion" should "create PointSegments" in {
+      val segment = PointSegment((0,0),(0,1),(1,1),(1,0))
       val shape = new MapRegion(List(segment))
 
       shape.segments.head should equal (segment) 
@@ -85,9 +98,9 @@ package net.hasnext.mapping.tests {
       val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
       val square2 = MapRegion((0,0),(0,1),(-1,1),(-1,0))
 
-      var square1_segmented = square1.findCommonSegments(square2)
+      var square1_PointSegmented = square1.findCommonPointSegments(square2)
 
-      square1_segmented.segments.length should equal (2)
+      square1_PointSegmented.segments.length should equal (2)
     } 
     
     "MapRegion" should "be stay the same when combined with another that has no overlap" in {
@@ -95,9 +108,9 @@ package net.hasnext.mapping.tests {
       val square1 = MapRegion((0,0),(0,1),(1,1),(1,0))
       val square2 = MapRegion((3,3),(3,2),(-2,2),(-2,3))
 
-      var square1_segmented = square1.findCommonSegments(square2)
+      var square1_PointSegmented = square1.findCommonPointSegments(square2)
 
-      square1_segmented.segments.length should equal (1)
+      square1_PointSegmented.segments.length should equal (1)
     } 
   }
 
@@ -113,19 +126,19 @@ package net.hasnext.mapping.tests {
      Utility.longestCommonSubstring(List(4,5,6), List(3,4,5)) should equal (List(4,5)) 
     }
   }
-  class CommonSegmentSpec extends FlatSpec with ShouldMatchers
+  class CommonPointSegmentSpec extends FlatSpec with ShouldMatchers
   {
-    def segmentOverlaps(segment1: Segment, segment2: Segment) = {
-      val lcs = Utility.longestCommonSubstring(segment1.points, segment2.points)
-      new Segment(lcs)
+    def PointSegmentOverlaps(PointSegment1: PointSegment, PointSegment2: PointSegment) = {
+      val lcs = Utility.longestCommonSubstring(PointSegment1.points, PointSegment2.points)
+      new PointSegment(lcs)
     }
 
-    "CommonSegment" should "identify common segments" in {
-      val square1 = Segment((0,0),(0,1),(1,1),(1,0))
-      val square2 = Segment((0,0),(0,1),(-1,1),(-1,0))
+    "CommonPointSegment" should "identify common PointSegments" in {
+      val square1 = PointSegment((0,0),(0,1),(1,1),(1,0))
+      val square2 = PointSegment((0,0),(0,1),(-1,1),(-1,0))
 
-      val overlap = segmentOverlaps(square1, square2)
-      overlap should equal (Segment((0,0),(0,1))) 
+      val overlap = PointSegmentOverlaps(square1, square2)
+      overlap equivalentTo PointSegment((0,0),(0,1)) should equal (true) 
     }
   }
 }

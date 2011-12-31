@@ -61,10 +61,11 @@ package net.hasnext.mapping{
     } 
 
   }
-  class Segment(val points : Seq[MapPoint]){
+  
+  class PointSegment(val points : Seq[MapPoint]){
     def this() = this(List())
-    def splitBySegment(subsegment: Segment) : List[Segment] = {
-      val index = points.indexOfSlice(subsegment.points)
+    def splitByPointSegment(subPointSegment: PointSegment) : List[PointSegment] = {
+      val index = points.indexOfSlice(subPointSegment.points)
 
       if(index == -1)
       {
@@ -73,44 +74,45 @@ package net.hasnext.mapping{
       else{
         val initialSequenceLength = index
         val initial = points.take(index)
-        val subsegmentLength = subsegment.points.length
-        val leftOver = new Segment(points.drop(initialSequenceLength + subsegmentLength))
+        val subPointSegmentLength = subPointSegment.points.length
+        val leftOver = new PointSegment(points.drop(initialSequenceLength + subPointSegmentLength))
        
         val rest = leftOver.points.length match {
-          case 0 => List[Segment]()
-          case _ => leftOver.splitBySegment(subsegment)
+          case 0 => List[PointSegment]()
+          case _ => leftOver.splitByPointSegment(subPointSegment)
         }
         if(index > 0){
-          new Segment(initial) :: subsegment :: rest
+          new PointSegment(initial) :: subPointSegment :: rest
         }
         else{
-          subsegment :: rest
+          subPointSegment :: rest
         }
       }
     }
-    override def equals(other: Any) = other match {
-      case that: Segment =>
-        this.points == that.points
-      case _ =>
-        false
+    def equivalentTo(other: PointSegment) = {
+      this.points == other.points
+    }
+    override def equals(other: Any) = {
+      throw new Exception() 
     }
     override def toString = {
-        "Segment(" + points.toString + ")"
+        "PointSegment(" + points.toString + ")"
     }
   }
 
-  object Segment {
+  object PointSegment {
     def apply(points: Tuple2[Double,Double]*) = {
-      new Segment(points map (x=> MapPoint(x))) 
+      new PointSegment(points map (x=> MapPoint(x))) 
     }
   }
-  class MapRegion(val segments : List[Segment]) {
-    def findCommonSegments(otherRegion: MapRegion) = {
+
+  class MapRegion(val segments : List[PointSegment]) {
+    def findCommonPointSegments(otherRegion: MapRegion) = {
       val extract = Utility.longestCommonSubstring(segments.head.points, otherRegion.segments.head.points)    
       extract match {
         case Seq() => this;
         case xs => new MapRegion(
-          segments.map(x => x.splitBySegment(new Segment(extract))).flatten
+          segments.map(x => x.splitByPointSegment(new PointSegment(extract))).flatten
         )
       }
     }
@@ -119,8 +121,8 @@ package net.hasnext.mapping{
 
   object MapRegion{
     def apply(points: Tuple2[Double,Double]*) = {
-      // TODO: Fix the duplication here. Should be able to call the segment singleton constructor
-      new MapRegion(List(new Segment(points map (x => MapPoint(x)))))
+      // TODO: Fix the duplication here. Should be able to call the PointSegment singleton constructor
+      new MapRegion(List(new PointSegment(points map (x => MapPoint(x)))))
     }
   }
   
@@ -131,7 +133,7 @@ package net.hasnext.mapping{
           (z,x) => 
           {
             if(z != x){
-              z.findCommonSegments(x)
+              z.findCommonPointSegments(x)
             }
             else{
               z
