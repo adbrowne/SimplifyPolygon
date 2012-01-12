@@ -37,7 +37,7 @@ package net.hasnext.mapping{
   {
     override def toString = "(" + x + "," + y + ")"
     override def hashCode = 41 * (41 + x.toInt) + y.toInt
-    
+
     val tolerance = 0.0005
 
     def withinTolerance(left: Double,right: Double) = {
@@ -66,18 +66,18 @@ package net.hasnext.mapping{
     def assignId(newId : Int) = {
       new PointSegment(newId, this.points)
     }
-    def this() = this(0, List())
-      def this(points: Seq[MapPoint]) = this(0,points)
+    def this() = this(0, List());
+    def this(points: Seq[MapPoint]) = this(0,points)
       val children = List()
       def splitByPointSegment(subPointSegment: PointSegment) : Segment = splitByPointSegment(0, subPointSegment)
 
       def leafSegments = {
-        List(this)
-      }
-      def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment = {
+      List(this)
+    }
+    def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment = {
       val index = points.indexOfSlice(subPointSegment.points)
 
-        var varNextId = nextid
+        var varNextId = nextid;
       if(index == -1 || this == subPointSegment) {
         this
       }
@@ -97,8 +97,8 @@ package net.hasnext.mapping{
           varNextId = varNextId + 1
           var initialSegment = new PointSegment(pointId, initial) 
             val children = leftOver.points.length match {
-              case 0 => List(initialSegment,subPointSegment)
-              case _ => List(initialSegment,subPointSegment,leftOver.splitByPointSegment(varNextId, subPointSegment))
+            case 0 => List(initialSegment,subPointSegment)
+            case _ => List(initialSegment,subPointSegment,leftOver.splitByPointSegment(varNextId, subPointSegment))
           }
           new GroupSegment(this.id, children)
         }
@@ -107,7 +107,7 @@ package net.hasnext.mapping{
             case 0 => List(subPointSegment)
             case _ => List(subPointSegment,leftOver.splitByPointSegment(varNextId, subPointSegment))
           }
-            new GroupSegment(this.id,children)
+          new GroupSegment(this.id,children)
         }
       }
     }
@@ -137,58 +137,58 @@ package net.hasnext.mapping{
   class MapRegion(val segmentId : Int, val name: String) {
   }
 
-trait Segment
-{
-  val id : Int;
-  val children: List[Segment];
-  def equivalentTo(other: Segment) : Boolean
-  def leafSegments : List[PointSegment]
-  def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment 
-}
-
-class GroupSegment(val id : Int, val children: List[Segment]) extends Segment
-{ 
-  def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment = this; 
-  def leafSegments = children.map(x => x.leafSegments).flatten
-  def equivalentTo(other: Segment) = {
-    false
+  trait Segment
+  {
+    val id : Int;
+    val children: List[Segment];
+    def equivalentTo(other: Segment) : Boolean
+    def leafSegments : List[PointSegment]
+    def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment 
   }
-}
 
-class PolyMap(val shapes: List[MapRegion], nextSegmentNum : Int = 1, val segments: List[Segment]){
-  def this() = this(List(), 1, List())
+  class GroupSegment(val id : Int, val children: List[Segment]) extends Segment
+  { 
+    def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment = this; 
+    def leafSegments = children.map(x => x.leafSegments).flatten
+    def equivalentTo(other: Segment) = {
+      false
+    }
+  }
 
-  def addShape(pointSegment: PointSegment, name: String) : PolyMap = {
-    val newPointSegment = pointSegment.assignId(nextSegmentNum)
+  class PolyMap(val shapes: List[MapRegion], nextSegmentNum : Int = 1, val segments: List[Segment]){
+    def this() = this(List(), 1, List())
 
-      var segmentNum = nextSegmentNum + 1
-    
+      def addShape(pointSegment: PointSegment, name: String) : PolyMap = {
+      val newPointSegment = pointSegment.assignId(nextSegmentNum)
+
+        var segmentNum = nextSegmentNum + 1
+
       val longestSubSegment = leafSegments.foldLeft(Seq[MapPoint]())((currentLongest, x)=> {
-        var longest = Utility.longestCommonSubstring(newPointSegment.points, x.points);
-        if(longest.length > currentLongest.length) longest
-        else currentLongest
+          var longest = Utility.longestCommonSubstring(newPointSegment.points, x.points);
+          if(longest.length > currentLongest.length) longest
+          else currentLongest
 
-      });
-     val newSegments = if(longestSubSegment.length > 0){
-       println(longestSubSegment.length)
-      val newSegment = new PointSegment(segmentNum, longestSubSegment)
-      segmentNum = segmentNum + 1
+        });
+      val newSegments = if(longestSubSegment.length > 0){
+        println(longestSubSegment.length)
+        val newSegment = new PointSegment(segmentNum, longestSubSegment)
+          segmentNum = segmentNum + 1
         segments.map(x=>x.splitByPointSegment(segmentNum, newSegment))
-     }
-     else{
-      segments
-     }
-    new PolyMap(new MapRegion(nextSegmentNum, name)::shapes, segmentNum, newPointSegment :: newSegments)
-  }
-  
-  val leafSegments : Seq[PointSegment] = {
-    (for(segment <- segments)
-      yield segment.leafSegments)
-      .flatten.toSet.toSeq
-  } 
+      }
+      else{
+        segments
+      }
+      new PolyMap(new MapRegion(nextSegmentNum, name)::shapes, segmentNum, newPointSegment :: newSegments)
+    }
 
-  def getSegment(id: Int) = {
-    segments.filter(x => x.id == id).head
+    val leafSegments : Seq[PointSegment] = {
+      (for(segment <- segments)
+        yield segment.leafSegments)
+      .flatten.toSet.toSeq
+    } 
+
+    def getSegment(id: Int) = {
+      segments.filter(x => x.id == id).head
+    }
   }
-}
 }
