@@ -77,7 +77,7 @@ package net.hasnext.mapping{
     def splitByPointSegment(nextid: Int, subPointSegment: PointSegment) : Segment = {
       val index = points.indexOfSlice(subPointSegment.points)
 
-        var varNextId = nextid;
+        var varNextId = nextid
       if(index == -1 || this == subPointSegment) {
         this
       }

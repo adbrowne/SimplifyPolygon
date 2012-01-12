@@ -80,7 +80,7 @@ package net.hasnext.mapping.tests {
       val segment = PointSegment((0,0),(0,1),(1,1),(1,0))
       val subPointSegment = PointSegment((2,2),(3,3))
 
-      segment.splitByPointSegment(subPointSegment) should equal (List(segment))
+      segment.splitByPointSegment(subPointSegment) should equal (segment)
     }
   }
 
