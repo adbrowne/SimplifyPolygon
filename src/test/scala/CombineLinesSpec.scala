@@ -134,43 +134,71 @@ package net.hasnext.mapping.combinelines.tests {
           val list1: Seq[PointCrossIndex],
           val list2: Seq[PointCrossIndex],
           val buildingSeq: Boolean = false,
-          val commonSeq: Seq[PointCrossIndex],
+          val commonSeq: Seq[MapPoint],
           val list1Segments: Seq[Segment],
           val list2Segments: Seq[Segment]
         )
         {
-            def addToSeqList(pci: PointCrossIndex, list: Seq[Segment]) = {
+            def addToSeqList(pci: PointCrossIndex, list: Seq[Segment]) : Seq[Segment] = {
               list
-/*              if(buildingSeq){
-                list ::: List(new Segment(pci.point))
+              if(buildingSeq){
+                list :+ new Segment(commonSeq) //:+ new Segment(List(pci.point))
               }
               else{
                 if(list.length == 0){
-                  List(new Segment(pci.point))
+                  List(new Segment(List(pci.point)))
                 }
                 else{
-                  list.init.toList ::: List( new Segment(list.last.points.toList ::: List(List(pci.point)) ))
+                  val initialItems = list.init.toList 
+                  val newSegment =  new Segment(list.last.points :+ pci.point)
+                  initialItems :+ newSegment
                 }
-              }*/
+              }
             }
 
-            def add2ToCommon = {
-              this
+            def add2ToCommon : Status = {
+              if(buildingSeq)
+              {
+                Status(list1,list2.tail,true,commonSeq.toList :+ list2.head.point,list1Segments,list2Segments)
+              }
+              else{
+                Status(list1,list2.tail,true,list2.head.point :: Nil,list1Segments,list2Segments)
+              }
             }
 
-            def add1ToCommon = {
-              this
+            def add1ToCommon : Status = {
+              if(buildingSeq)
+              {
+                Status(list1.tail,list2,true,commonSeq.toList :+ list1.head.point,list1Segments,list2Segments)
+              }
+              else{
+                Status(list1.tail,list2,true,list1.head.point :: Nil,addToSeqList(list1.head,list1Segments),list2Segments)
+              }
             }
 
             def finishList2 = {
-              this
+              val segmentForEnd = new Segment(list2.map(x=> x.point))
+              if(buildingSeq){
+                val commonSegment = new Segment(commonSeq)
+                Status(Nil,Nil,false,commonSeq,list1Segments :+ commonSegment,(list2Segments :+ commonSegment) :+ segmentForEnd)
+              }
+              else {
+                Status(Nil,Nil,false,commonSeq,list1Segments,list2Segments :+ segmentForEnd)
+              }
             }
             
             def finishList1 = {
-              this
+              val segmentForEnd = new Segment(list1.map(x=> x.point))
+              if(buildingSeq){
+                val commonSegment = new Segment(commonSeq)
+                Status(Nil,Nil,false,commonSeq,list1Segments :+ commonSegment :+ segmentForEnd,list2Segments :+ commonSegment)
+              }
+              else {
+                Status(Nil,Nil,false,commonSeq,list1Segments :+ segmentForEnd,list2Segments)
+              }
             }
 
-            def takeNextPoint = {
+            def takeNextPoint : Status = {
               (list1.head,list2.head) match {
                 case (PointCrossIndex(_, _, None),
                       PointCrossIndex(_,_,None)) => 
@@ -186,7 +214,7 @@ package net.hasnext.mapping.combinelines.tests {
                 case (PointCrossIndex(_, _, None),item2) => 
                   add2ToCommon
                 case (item1,PointCrossIndex(_,_,None)) => 
-                  add2ToCommon
+                  add1ToCommon
                 case (
                   PointCrossIndex(index1, point1, Some(crossIndex1)), 
                   PointCrossIndex(index2, point2, Some(crossIndex2))
@@ -213,12 +241,15 @@ package net.hasnext.mapping.combinelines.tests {
         val list1 = getCrossIndexedList(segment1, segment2)
         val list2 = getCrossIndexedList(segment2, segment1)
 
-        val commonSegment = NewSegment((1,1),(2,2))
+        val result = getCommonItems(Status(list1,list2,false,Nil,Nil,Nil))
+
+        val result1 = new Part(result.list1Segments)
+        /*val commonSegment = NewSegment((1,1),(2,2))
         val result1  = new Part(
           List(
             NewSegment((0,0),(1,1)), 
             commonSegment)
-        )
+        )*/
         (result1, Nil) 
     }
 
