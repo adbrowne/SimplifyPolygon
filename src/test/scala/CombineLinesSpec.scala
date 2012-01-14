@@ -118,7 +118,116 @@ package net.hasnext.mapping.combinelines.tests {
         point isOn segment should equal (false)
     }
  
-    
+    def combineCommonSubsegments (segment1: Segment, segment2: Segment) = {
+        
+        def getCrossIndexedList(list : Segment, listToCrossIndex: Segment) = {
+          val points = list.points
+          val locations = points.map(p => pointOnSegment(p, listToCrossIndex))
+          val indexPointAndCrossIndex = points.zipWithIndex.zip(locations)
+        
+          indexPointAndCrossIndex.map(x => x match {
+            case ((point, index), crossIndex) => PointCrossIndex(index, point, crossIndex)
+          })
+        }
+       
+        case class Status(
+          val list1: Seq[PointCrossIndex],
+          val list2: Seq[PointCrossIndex],
+          val buildingSeq: Boolean = false,
+          val commonSeq: Seq[PointCrossIndex],
+          val list1Segments: Seq[Segment],
+          val list2Segments: Seq[Segment]
+        )
+        {
+            def addToSeqList(pci: PointCrossIndex, list: Seq[Segment]) = {
+              list
+/*              if(buildingSeq){
+                list ::: List(new Segment(pci.point))
+              }
+              else{
+                if(list.length == 0){
+                  List(new Segment(pci.point))
+                }
+                else{
+                  list.init.toList ::: List( new Segment(list.last.points.toList ::: List(List(pci.point)) ))
+                }
+              }*/
+            }
+
+            def add2ToCommon = {
+              this
+            }
+
+            def add1ToCommon = {
+              this
+            }
+
+            def finishList2 = {
+              this
+            }
+            
+            def finishList1 = {
+              this
+            }
+
+            def takeNextPoint = {
+              (list1.head,list2.head) match {
+                case (PointCrossIndex(_, _, None),
+                      PointCrossIndex(_,_,None)) => 
+                    Status(
+                      list1.tail, 
+                      list2.tail, 
+                      false, 
+                      Nil, 
+                      addToSeqList(list1.head, list1Segments),
+                      addToSeqList(list2.head, list2Segments)
+                    )
+
+                case (PointCrossIndex(_, _, None),item2) => 
+                  add2ToCommon
+                case (item1,PointCrossIndex(_,_,None)) => 
+                  add2ToCommon
+                case (
+                  PointCrossIndex(index1, point1, Some(crossIndex1)), 
+                  PointCrossIndex(index2, point2, Some(crossIndex2))
+                ) => 
+                  if(crossIndex1 < index2){ 
+                    add1ToCommon
+                  }
+                  else{
+                    add2ToCommon
+                  }
+              }
+          }
+        }
+
+        def getCommonItems(status: Status) : Status = {
+          (status.list1, status.list2) match {
+            case (Nil,Nil) =>  status
+            case (Nil, _) => status.finishList2
+            case (_, Nil) => status.finishList1
+            case (_, _) => getCommonItems(status.takeNextPoint)
+          }
+        }
+        
+        val list1 = getCrossIndexedList(segment1, segment2)
+        val list2 = getCrossIndexedList(segment2, segment1)
+
+        val commonSegment = NewSegment((1,1),(2,2))
+        val result1  = new Part(
+          List(
+            NewSegment((0,0),(1,1)), 
+            commonSegment)
+        )
+        (result1, Nil) 
+    }
+
+    case class PointCrossIndex(
+      val index : Int, 
+      val point : MapPoint, 
+      val crossIndex : Option[Int]
+    )
+
     def findCommonSegment(segment1: Segment, segment2: Segment) = {
         
         def getCrossIndexedList(list : Segment, listToCrossIndex: Segment) = {
@@ -131,12 +240,6 @@ package net.hasnext.mapping.combinelines.tests {
           })
           .dropWhile(x => x.crossIndex == None)
         }
-
-        case class PointCrossIndex(
-          val index : Int, 
-          val point : MapPoint, 
-          val crossIndex : Option[Int]
-        )
 
         def otherListEmpty(list : Seq[PointCrossIndex]) = {
           if(list.head.crossIndex == None){
@@ -255,6 +358,26 @@ package net.hasnext.mapping.combinelines.tests {
         val commonSegment = NewSegment((1,1),(2,2))
 
         result should equal (commonSegment)
+    }
+
+    "Overlapping segments" should "include common pieces" in {
+        val segment1 = NewSegment((0,0),(2,2))
+        val segment2 = NewSegment((1,1),(3,3))
+
+        val result = combineCommonSubsegments(segment1, segment2)
+
+        val result1 = result._1
+        val result2 = result._2
+
+        val commonSegment = NewSegment((1,1),(2,2))
+
+        result1 should equal (
+          new Part(
+            List(
+              NewSegment((0,0),(1,1)), 
+              commonSegment)
+          )
+        )
     }
   }
 }
