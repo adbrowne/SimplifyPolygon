@@ -120,6 +120,7 @@ package net.hasnext.mapping.combinelines.tests {
  
     
     def findCommonSegment(segment1: Segment, segment2: Segment) = {
+        
         def getCrossIndexedList(list : Segment, listToCrossIndex: Segment) = {
           val points = list.points
           val locations = points.map(p => pointOnSegment(p, listToCrossIndex))
@@ -130,54 +131,51 @@ package net.hasnext.mapping.combinelines.tests {
           })
           .dropWhile(x => x.crossIndex == None)
         }
+
         case class PointCrossIndex(
           val index : Int, 
           val point : MapPoint, 
           val crossIndex : Option[Int]
         )
 
-        def getCommonItems(list1 : Seq[PointCrossIndex], list2: Seq[PointCrossIndex]) : List[MapPoint] = {
-
-          println("List1: " + list1)
-          println("List2: " + list2)
-          if(list1.headOption == None && list2.headOption == None){
+        def otherListEmpty(list : Seq[PointCrossIndex]) = {
+          if(list.head.crossIndex == None){
             Nil
           }
-          else if(list1.headOption == None){
-            if(list2.head.crossIndex == None){
-              Nil
-            }
-            else{
-              list2.head.point :: getCommonItems(list1,list2.tail)
-            }
-          }
-          else if(list2.headOption == None){
-            if(list1.head.crossIndex == None){
-              Nil
-            }
-            else{
-              list1.head.point :: getCommonItems(list1.tail,list2)
-            }
-          }
           else{
-            val head1 = list1.head
-            val head2 = list2.head
+            list.head.point :: getCommonItems(Nil,list.tail)
+          }
+        }
 
-            (head1,head2) match {
-              case (PointCrossIndex(_, _, None),PointCrossIndex(_,_,None)) => Nil
-              case (PointCrossIndex(_,_,None),PointCrossIndex(index2,point2,Some(x))) => point2 :: getCommonItems(list1, list2.tail)
-              case (PointCrossIndex(index1,point1,Some(x)),PointCrossIndex(_,_,None)) => point1 :: getCommonItems(list1.tail, list2)
-              case (
-                PointCrossIndex(index1, point1, Some(crossIndex1)), 
-                PointCrossIndex(index2, point2, Some(crossIndex2))
-              ) => 
-                if(crossIndex1 < index2){
-                  point1 :: getCommonItems(list1.tail, list2)
-                }
-                else{
-                  point2 :: getCommonItems(list1, list2.tail)
-                }
-            }
+        def takeNextPoint(
+          list1 : Seq[PointCrossIndex],
+          list2: Seq[PointCrossIndex]
+        ) = {
+          (list1.head,list2.head) match {
+            case (PointCrossIndex(_, _, None),PointCrossIndex(_,_,None)) => Nil
+            case (PointCrossIndex(_, _, None),item2) => 
+              item2.point :: getCommonItems(list1, list2.tail)
+            case (item1,PointCrossIndex(_,_,None)) => 
+              item1.point :: getCommonItems(list1.tail, list2)
+            case (
+              PointCrossIndex(index1, point1, Some(crossIndex1)), 
+              PointCrossIndex(index2, point2, Some(crossIndex2))
+            ) => 
+              if(crossIndex1 < index2){ 
+                point1 :: getCommonItems(list1.tail, list2)
+              }
+              else{
+                point2 :: getCommonItems(list1, list2.tail)
+              }
+          }
+        }
+
+        def getCommonItems(list1 : Seq[PointCrossIndex], list2: Seq[PointCrossIndex]) : List[MapPoint] = {
+          (list1, list2) match {
+            case (Nil,Nil) =>  Nil
+            case (Nil, _) => otherListEmpty(list2)
+            case (_, Nil) => otherListEmpty(list1)
+            case (_, _) => takeNextPoint(list1,list2)
           }
         }
 
