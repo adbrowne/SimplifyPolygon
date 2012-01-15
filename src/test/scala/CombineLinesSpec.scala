@@ -169,94 +169,92 @@ package net.hasnext.mapping.combinelines.tests {
       val AddRightCommon = Value
     }
 
+    case class SegmentState(
+      val inputs : Seq[MapPoint],
+      val currentSegment : Seq[MapPoint],
+      val completedSegments : Seq[Segment]
+    ){
+      def moveNext = {
+        SegmentState(
+          inputs.tail,
+          currentSegment = currentSegment :+ inputs.head,
+          completedSegments
+        )
+      }
+
+      def getCompletedSegments(currentItem : MapPoint) = {
+        if(currentSegment != Nil){
+          completedSegments :+ new Segment(currentSegment :+ currentItem)
+        }
+        else{
+          completedSegments
+        }
+      }
+
+      def addToCommon = {
+        SegmentState(
+          inputs.tail,
+          Nil,
+          getCompletedSegments(inputs.head)
+        )
+      }
+
+      def otherAddedToCommon(item : MapPoint) = {
+        SegmentState(
+          inputs,
+          Nil,
+          getCompletedSegments(item)
+        )
+      }
+    }
+
     def extractSegments(
-      leftSegment: Seq[MapPoint],
-      rightSegment: Seq[MapPoint],
+      left: SegmentState,
+      right: SegmentState,
       commands: Seq[SegmentStep.Value],
-      currentLeft: Seq[MapPoint],
-      currentRight: Seq[MapPoint],
-      currentCommon: Seq[MapPoint],
-      leftCompleteSegments: Seq[Segment],
-      rightCompleteSegments: Seq[Segment]) : (Part,Part) = {
+      currentCommon: Seq[MapPoint]
+    ) : (Part,Part) = {
       def recurse(
-        leftSegment: Seq[MapPoint] = leftSegment,
-        rightSegment: Seq[MapPoint] = rightSegment,
+        left: SegmentState = left,
+        right: SegmentState =  right,
         commands: Seq[SegmentStep.Value] = commands.tail,
-        currentLeft: Seq[MapPoint] = currentLeft,
-        currentRight: Seq[MapPoint] = currentRight,
-        currentCommon: Seq[MapPoint] = currentCommon,
-        leftCompleteSegments: Seq[Segment] = leftCompleteSegments,
-        rightCompleteSegments: Seq[Segment] = rightCompleteSegments
+        currentCommon: Seq[MapPoint] = currentCommon
       ) = {
-        extractSegments(leftSegment, rightSegment, commands, 
-          currentLeft, currentRight, currentCommon, leftCompleteSegments, rightCompleteSegments)
+        extractSegments(left, right, commands, currentCommon)
       }
 
       def partOfNonEmptySegments(segments: Seq[Segment]) = {
         new Part(segments.filter(x=> x.points != Nil))
       }
 
-      def getCompletedSegments(
-        currentItem: MapPoint,
-        currentItems: Seq[MapPoint],
-        currentCompletedItems: Seq[Segment]) = {
-        if(currentItems != Nil){
-          currentCompletedItems :+ new Segment(currentItems :+ currentItem)
-        }
-        else{
-          currentCompletedItems
-        }
-      }
 
       commands match {
         case Nil =>
           (
-            partOfNonEmptySegments(leftCompleteSegments :+ new Segment(currentCommon) :+ new Segment(currentLeft)), 
-            partOfNonEmptySegments(rightCompleteSegments :+ new Segment(currentCommon) :+ new Segment(currentRight))
+            partOfNonEmptySegments(left.completedSegments :+ new Segment(currentCommon) :+ new Segment(left.currentSegment)), 
+            partOfNonEmptySegments(right.completedSegments :+ new Segment(currentCommon) :+ new Segment(right.currentSegment))
           )
         case SegmentStep.MoveNextLeft :: xs  => 
             recurse(
-              leftSegment = leftSegment.tail,
-              currentLeft = currentLeft :+ leftSegment.head
+              left = left.moveNext
             )
         case SegmentStep.MoveNextRight :: xs  => 
             recurse(
-              rightSegment = rightSegment.tail,
-              currentRight = currentRight :+ rightSegment.head
+              right = right.moveNext
             )
         case SegmentStep.AddLeftCommon :: xs  => 
+          val item = left.inputs.head
            recurse(
-              leftCompleteSegments = getCompletedSegments(
-                leftSegment.head,
-                currentLeft,
-                leftCompleteSegments
-              ),
-              rightCompleteSegments = getCompletedSegments(
-                leftSegment.head,
-                currentRight,
-                rightCompleteSegments
-              ),
-              currentLeft = Nil,
-              currentRight = Nil,
-              leftSegment = leftSegment.tail,
-              currentCommon = currentCommon :+ leftSegment.head
+              left = left.addToCommon,
+              right = right.otherAddedToCommon(item),
+              currentCommon = currentCommon :+ item
             )
         case SegmentStep.AddRightCommon :: xs  => 
-            recurse(
-              leftCompleteSegments = getCompletedSegments(
-                rightSegment.head,
-                currentLeft,
-                leftCompleteSegments
-              ),
-              rightCompleteSegments = getCompletedSegments(
-                rightSegment.head,
-                currentRight,
-                rightCompleteSegments
-              ),
-              currentLeft = Nil,
-              currentRight = Nil,
-              rightSegment = rightSegment.tail,
-              currentCommon = currentCommon :+ rightSegment.head
+          val item = right.inputs.head
+           recurse(
+              left = left.otherAddedToCommon(item),
+              right = right.addToCommon, 
+              currentCommon = currentCommon :+ item
             )
       }
     }
@@ -266,7 +264,11 @@ package net.hasnext.mapping.combinelines.tests {
       rightSegment: Segment,
       commands: Seq[SegmentStep.Value]
     ) : (Part,Part) = {
-      extractSegments(leftSegment.points, rightSegment.points, commands, Nil, Nil, Nil, Nil, Nil)
+      extractSegments(
+        SegmentState(leftSegment.points, Nil, Nil), 
+        SegmentState(rightSegment.points, Nil, Nil),
+        commands, 
+        Nil)
     }
     
     "Can process path list" should "combine items" in {
