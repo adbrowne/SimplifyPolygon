@@ -11,9 +11,9 @@ package net.hasnext.mapping.combinelines.tests {
     }
     def isOn(segment: Segment) : Boolean = {
       val lines = segment.points.zip(segment.points.tail)
-      val distances = lines.map(line => line match {
-        case (start, end) => this.isOn(start,end)
-      })
+        val distances = lines.map(line => line match {
+          case (start, end) => this.isOn(start,end)
+        })
       distances.exists(x => x)
     }
 
@@ -23,13 +23,13 @@ package net.hasnext.mapping.combinelines.tests {
 
       math.sqrt(xDif * xDif + yDif * yDif)
     }
-    
+
     // http://paulbourke.net/geometry/pointline/
     def distanceTo(lineStart: MapPoint, lineEnd: MapPoint) : Double = {
       def calculateU(x1:Double,y1:Double,x2:Double,y2:Double,x3:Double,y3:Double) = {
         val numerator = (x3 -x1) * (x2 - x1) + (y3 - y1)* (y2 - y1)
           val lineLength = lineStart distanceTo lineEnd
-          val denominator = math.pow(lineLength, 2)
+        val denominator = math.pow(lineLength, 2)
 
           numerator/denominator
       }
@@ -60,7 +60,6 @@ package net.hasnext.mapping.combinelines.tests {
   }
 
   class Shape(val parts: Seq[Part])
-  
 
   case class Segment(val points: Seq[MapPoint])
 
@@ -68,7 +67,7 @@ package net.hasnext.mapping.combinelines.tests {
 
   class PolygonMap(val shapes : Seq[Shape]){
     val segments = shapes.flatMap(s => s.parts.flatMap(p => p.segments)) 
-  }
+    }
 
   object PolygonMap {
     def apply(shapes: Shape*) = {
@@ -77,273 +76,14 @@ package net.hasnext.mapping.combinelines.tests {
   }
 
   class CombineLinesSpec extends FlatSpec with ShouldMatchers {
-/*    "Parallel Lines" should "combine" in {
-      val leftSquare = Shape((0,0),(1,0),(1,1),(0,1)) 
-      val rightSquare = Shape((1,0),(1,1),(2,1),(2,0))
-      val map = PolygonMap(leftSquare,rightSquare)
-
-      map.segments.length should equal (3)
-    } */
-    def NewSegment(points: Tuple2[Int,Int]*) = {
-      new Segment(points.map(p => p match {
-          case (x,y) => new MapPoint(x,y)
-        }))
+    def NewSegment(points: Tuple2[Double,Double]*) = {
+      new Segment(points.map(x => new MapPoint(x._1,x._2)))
     }
 
-    def NewPart(points: Tuple2[Int,Int]*) = {
-      val segment = new Segment(points.map(p => p match {
-          case (x,y) => new MapPoint(x,y)
-        }))
-      new Part(segment :: Nil)
-    }
-    
-    def NewShape(points: Tuple2[Int,Int]*) = {
-      val segment = new Segment(points.map(p => p match {
-          case (x,y) => new MapPoint(x,y)
-        }))
-      new Shape(new Part(segment :: Nil) :: Nil)
-    }
+    case class PointToSegmentMapping(val index: Int, val crossIndex: Option[Int], val point: MapPoint)
 
-    "Point" should "be on segment" in {
-        val point = new MapPoint(1,1)
-        val segment = NewSegment((0,0),(2,2))
-
-        point isOn segment should equal (true)
-    }
-    
-    "Point past the end" should "not be on segment" in {
-        val point = new MapPoint(3,3)
-        val segment = NewSegment((0,0),(2,2))
-
-        point isOn segment should equal (false)
-    }
- 
-    def combineCommonSubsegments (segment1: Segment, segment2: Segment) = {
-        
-        def getCrossIndexedList(list : Segment, listToCrossIndex: Segment) = {
-          val points = list.points
-          val locations = points.map(p => pointOnSegment(p, listToCrossIndex))
-          val indexPointAndCrossIndex = points.zipWithIndex.zip(locations)
-        
-          indexPointAndCrossIndex.map(x => x match {
-            case ((point, index), crossIndex) => PointCrossIndex(index, point, crossIndex)
-          })
-        }
-       
-        case class Status(
-          val list1: Seq[PointCrossIndex],
-          val list2: Seq[PointCrossIndex],
-          val buildingSeq: Boolean = false,
-          val commonSeq: Seq[MapPoint],
-          val list1Segments: Seq[Segment],
-          val list2Segments: Seq[Segment]
-        )
-        {
-            def addToSeqList(pci: PointCrossIndex, list: Seq[Segment]) : Seq[Segment] = {
-              list
-              if(buildingSeq){
-                list :+ new Segment(commonSeq) //:+ new Segment(List(pci.point))
-              }
-              else{
-                if(list.length == 0){
-                  List(new Segment(List(pci.point)))
-                }
-                else{
-                  val initialItems = list.init.toList 
-                  val newSegment =  new Segment(list.last.points :+ pci.point)
-                  initialItems :+ newSegment
-                }
-              }
-            }
-
-            def add2ToCommon : Status = {
-              if(buildingSeq)
-              {
-                Status(list1,list2.tail,true,commonSeq.toList :+ list2.head.point,list1Segments,list2Segments)
-              }
-              else{
-                Status(list1,list2.tail,true,list2.head.point :: Nil,list1Segments,list2Segments)
-              }
-            }
-
-            def add1ToCommon : Status = {
-              if(buildingSeq)
-              {
-                Status(list1.tail,list2,true,commonSeq.toList :+ list1.head.point,list1Segments,list2Segments)
-              }
-              else{
-                Status(list1.tail,list2,true,list1.head.point :: Nil,addToSeqList(list1.head,list1Segments),list2Segments)
-              }
-            }
-
-            def finishList2 = {
-              val segmentForEnd = new Segment(list2.map(x=> x.point))
-              if(buildingSeq){
-                val commonSegment = new Segment(commonSeq)
-                Status(Nil,Nil,false,commonSeq,list1Segments :+ commonSegment,(list2Segments :+ commonSegment) :+ segmentForEnd)
-              }
-              else {
-                Status(Nil,Nil,false,commonSeq,list1Segments,list2Segments :+ segmentForEnd)
-              }
-            }
-            
-            def finishList1 = {
-              val segmentForEnd = new Segment(list1.map(x=> x.point))
-              if(buildingSeq){
-                val commonSegment = new Segment(commonSeq)
-                Status(Nil,Nil,false,commonSeq,list1Segments :+ commonSegment :+ segmentForEnd,list2Segments :+ commonSegment)
-              }
-              else {
-                Status(Nil,Nil,false,commonSeq,list1Segments :+ segmentForEnd,list2Segments)
-              }
-            }
-
-            def takeNextPoint : Status = {
-              (list1.head,list2.head) match {
-                case (PointCrossIndex(_, _, None),
-                      PointCrossIndex(_,_,None)) => 
-                    Status(
-                      list1.tail, 
-                      list2.tail, 
-                      false, 
-                      Nil, 
-                      addToSeqList(list1.head, list1Segments),
-                      addToSeqList(list2.head, list2Segments)
-                    )
-
-                case (PointCrossIndex(_, _, None),item2) => 
-                  add2ToCommon
-                case (item1,PointCrossIndex(_,_,None)) => 
-                  add1ToCommon
-                case (
-                  PointCrossIndex(index1, point1, Some(crossIndex1)), 
-                  PointCrossIndex(index2, point2, Some(crossIndex2))
-                ) => 
-                  if(crossIndex1 < index2){ 
-                    add1ToCommon
-                  }
-                  else{
-                    add2ToCommon
-                  }
-              }
-          }
-        }
-
-        def getCommonItems(status: Status) : Status = {
-          (status.list1, status.list2) match {
-            case (Nil,Nil) =>  status
-            case (Nil, _) => status.finishList2
-            case (_, Nil) => status.finishList1
-            case (_, _) => getCommonItems(status.takeNextPoint)
-          }
-        }
-        
-        val list1 = getCrossIndexedList(segment1, segment2)
-        val list2 = getCrossIndexedList(segment2, segment1)
-
-        val result = getCommonItems(Status(list1,list2,false,Nil,Nil,Nil))
-
-        val result1 = new Part(result.list1Segments)
-        /*val commonSegment = NewSegment((1,1),(2,2))
-        val result1  = new Part(
-          List(
-            NewSegment((0,0),(1,1)), 
-            commonSegment)
-        )*/
-        (result1, Nil) 
-    }
-
-    case class PointCrossIndex(
-      val index : Int, 
-      val point : MapPoint, 
-      val crossIndex : Option[Int]
-    )
-
-    def findCommonSegment(segment1: Segment, segment2: Segment) = {
-        
-        def getCrossIndexedList(list : Segment, listToCrossIndex: Segment) = {
-          val points = list.points
-          val locations = points.map(p => pointOnSegment(p, listToCrossIndex))
-          val indexPointAndCrossIndex = points.zipWithIndex.zip(locations)
-        
-          indexPointAndCrossIndex.map(x => x match {
-            case ((point, index), crossIndex) => PointCrossIndex(index, point, crossIndex)
-          })
-          .dropWhile(x => x.crossIndex == None)
-        }
-
-        def otherListEmpty(list : Seq[PointCrossIndex]) = {
-          if(list.head.crossIndex == None){
-            Nil
-          }
-          else{
-            list.head.point :: getCommonItems(Nil,list.tail)
-          }
-        }
-
-        def takeNextPoint(
-          list1 : Seq[PointCrossIndex],
-          list2: Seq[PointCrossIndex]
-        ) = {
-          (list1.head,list2.head) match {
-            case (PointCrossIndex(_, _, None),PointCrossIndex(_,_,None)) => Nil
-            case (PointCrossIndex(_, _, None),item2) => 
-              item2.point :: getCommonItems(list1, list2.tail)
-            case (item1,PointCrossIndex(_,_,None)) => 
-              item1.point :: getCommonItems(list1.tail, list2)
-            case (
-              PointCrossIndex(index1, point1, Some(crossIndex1)), 
-              PointCrossIndex(index2, point2, Some(crossIndex2))
-            ) => 
-              if(crossIndex1 < index2){ 
-                point1 :: getCommonItems(list1.tail, list2)
-              }
-              else{
-                point2 :: getCommonItems(list1, list2.tail)
-              }
-          }
-        }
-
-        def getCommonItems(list1 : Seq[PointCrossIndex], list2: Seq[PointCrossIndex]) : List[MapPoint] = {
-          (list1, list2) match {
-            case (Nil,Nil) =>  Nil
-            case (Nil, _) => otherListEmpty(list2)
-            case (_, Nil) => otherListEmpty(list1)
-            case (_, _) => takeNextPoint(list1,list2)
-          }
-        }
-
-        val list1 = getCrossIndexedList(segment1, segment2)
-        val list2 = getCrossIndexedList(segment2, segment1)
-      
-        new Segment(getCommonItems(list1,list2).map(x => x))
-    }
-
-    def findCommonSegments(part1: Part, part2: Part) = {
-        // TODO actually implement this
-        val commonSegment = NewSegment((1,1),(2,2))
-        val expected1 = new Part(NewSegment((0,0),(1,1)) :: commonSegment :: Nil)
-        val expected2 = new Part(commonSegment ::  NewSegment((2,2),(3,3)) :: Nil)
-        (expected1, expected2)
-    }
-
-    "Overlapping parts" should "Combine segments" in {
-        val part1 = NewPart((0,0),(2,2))
-        val part2 = NewPart((1,1),(3,3))
-
-        val newParts = findCommonSegments(part1, part2)
-
-        val commonSegment = NewSegment((1,1),(2,2))
-        val expected1 = new Part(NewSegment((0,0),(1,1)) :: commonSegment :: Nil)
-        val expected2 = new Part(commonSegment ::  NewSegment((2,2),(3,3)) :: Nil)
-
-
-        newParts._1 should equal (expected1)
-        newParts._2 should equal (expected2)
-    }
-   
     def pointOnSegment(point: MapPoint, segment: Segment) = {
-        val pairs = segment.points.zip(segment.points.tail)
+      val pairs = segment.points.zip(segment.points.tail)
 
         val initialState : Tuple2[Option[Int], Int] = (None, 0)
         val place = pairs.foldLeft(initialState)((state, pair) => {
@@ -351,64 +91,254 @@ package net.hasnext.mapping.combinelines.tests {
           val end = pair._2
           state match {
             case (None,x) => if(point.isOn(start, end)){
-              (Option(x), x+1) 
-                }
-              else{
-                (None, x + 1)
-              }
-            case other => other 
+              (Option(x), x+1)
+            }
+            else{
+              (None, x + 1)
+            }
+            case other => other
           }})
 
         place._1
-    }
+      }
 
-    "Overlapping segments" should "have point at the correct index" in {
-        val point = MapPoint(2,2)
-        val segment = NewSegment((1,1),(3,3))
-
-        val result = pointOnSegment(point, segment)
-
-        result should equal (Some(0))
-    }
-    
-    "Overlapping segments" should "have point at the correct index (1)" in {
-        val point = MapPoint(2,2)
-        val segment = NewSegment((0,0),(1,1),(3,3))
-
-        val result = pointOnSegment(point, segment)
-
-        result should equal (Some(1))
-    }
-    
-    "Overlapping segments" should "combine segments" in {
-        val segment1 = NewSegment((0,0),(2,2))
-        val segment2 = NewSegment((1,1),(3,3))
-
-        val result = findCommonSegment(segment1, segment2)
-
-        val commonSegment = NewSegment((1,1),(2,2))
-
-        result should equal (commonSegment)
-    }
-
-    "Overlapping segments" should "include common pieces" in {
-        val segment1 = NewSegment((0,0),(2,2))
-        val segment2 = NewSegment((1,1),(3,3))
-
-        val result = combineCommonSubsegments(segment1, segment2)
-
-        val result1 = result._1
-        val result2 = result._2
-
-        val commonSegment = NewSegment((1,1),(2,2))
-
-        result1 should equal (
-          new Part(
-            List(
-              NewSegment((0,0),(1,1)), 
-              commonSegment)
-          )
+      def getSegmentMapping(segment1: Segment, segment2: Segment) = {
+        val indexMap = segment1.points.map(p => pointOnSegment(p, segment2))
+        val points = indexMap.zipWithIndex.zip(segment1.points)
+        points.map(p => 
+          new PointToSegmentMapping(p._1._2,p._1._1,p._2)
         )
+      }
+
+      def getMatches(
+        segment1Mapping: Seq[PointToSegmentMapping],
+        segment2Mapping: Seq[PointToSegmentMapping]
+      ) = {
+            val lineUpEnd = NewSegment((0,1.5),(0,2))
+
+            new Part(
+              NewSegment((0,0),(0,1),(0,1.5)) :: lineUpEnd :: Nil
+            )
+      }
+
+      def combineSegments(segment1: Segment, segment2: Segment) = {
+        val segment1ToSegment2Mapping = getSegmentMapping(segment1,segment2)
+        val segment2ToSegment1Mapping = getSegmentMapping(segment2,segment1)
+
+        val segment1WithCommon = getMatches(
+          segment1ToSegment2Mapping,
+          segment2ToSegment1Mapping
+        )
+        (segment1,segment2)
+      }
+
+      "Find Common Segments" should "return the same segment when there is no relationship" in {
+        val lineUp = NewSegment((0,0),(0,1))
+        val lineDown = NewSegment((2,2),(2,1))
+        val commonSegments = combineSegments(lineUp, lineDown)
+
+        commonSegments._1 should equal (lineUp)
+        commonSegments._2 should equal (lineDown)
+      }
+
+        "Find Common Segments" should "return the same instance where there is a complete overlap" in {
+          val lineUp = NewSegment((0,0),(0,1))
+            val commonSegments = combineSegments(lineUp, lineUp)
+
+            commonSegments._1 should equal (lineUp)
+          commonSegments._2 should equal (lineUp)
+        }
+
+        /*
+        "Find Common Segments" should "split a segment where the second one overlaps it" in {
+          val lineUp = NewSegment((0,0),(0,1),(0,2))
+            val lineUpEnd = NewSegment((0,1.5),(0,2))
+            val commonSegments = combineSegments(lineUp, lineUpEnd)
+
+            commonSegments._1 should equal (
+            new Part(
+              NewSegment((0,0),(0,1),(0,1.5)) :: lineUpEnd :: Nil
+            )
+        )
+      commonSegments._2 should equal (lineUpEnd)
+    } */
+    object SegmentStep extends Enumeration {
+      val MoveNextLeft = Value
+      val MoveNextRight = Value
+      val AddLeftCommon = Value
+      val AddRightCommon = Value
+    }
+
+    case class ParseState(
+      val leftInSegment: Boolean = false,
+      val rightInSegment: Boolean =  false,
+      val buildingCommon: Boolean = false)
+
+    def extractSegments(
+      leftSegment: Seq[MapPoint],
+      rightSegment: Seq[MapPoint],
+      commands: Seq[SegmentStep.Value],
+      state: ParseState,
+      currentLeft: Seq[MapPoint],
+      currentRight: Seq[MapPoint],
+      currentCommon: Seq[MapPoint],
+      leftCompleteSegments: Seq[Segment],
+      rightCompleteSegments: Seq[Segment]) : (Part,Part) = {
+      def recurse(
+        leftSegment: Seq[MapPoint] = leftSegment,
+        rightSegment: Seq[MapPoint] = rightSegment,
+        commands: Seq[SegmentStep.Value] = commands.tail,
+        state: ParseState = state,
+        currentLeft: Seq[MapPoint] = currentLeft,
+        currentRight: Seq[MapPoint] = currentRight,
+        currentCommon: Seq[MapPoint] = currentCommon,
+        leftCompleteSegments: Seq[Segment] = leftCompleteSegments,
+        rightCompleteSegments: Seq[Segment] = rightCompleteSegments
+      ) = {
+        extractSegments(leftSegment, rightSegment, commands, state,
+          currentLeft, currentRight, currentCommon, leftCompleteSegments, rightCompleteSegments)
+      }
+
+      def partOfNonEmptySegments(segments: Seq[Segment]) = {
+        new Part(segments.filter(x=> x.points != Nil))
+      }
+
+      def getCompletedSegments(
+        currentItem: MapPoint,
+        currentItems: Seq[MapPoint],
+        currentCompletedItems: Seq[Segment]) = {
+        if(currentItems != Nil){
+          currentCompletedItems :+ new Segment(currentItems :+ currentItem)
+        }
+        else{
+          currentCompletedItems
+        }
+      }
+
+      commands match {
+        case Nil =>
+          (
+            partOfNonEmptySegments(leftCompleteSegments :+ new Segment(currentCommon) :+ new Segment(currentLeft)), 
+            partOfNonEmptySegments(rightCompleteSegments :+ new Segment(currentCommon) :+ new Segment(currentRight))
+          )
+        case SegmentStep.MoveNextLeft :: xs  => 
+            recurse(
+              leftSegment = leftSegment.tail,
+              currentLeft = currentLeft :+ leftSegment.head
+            )
+        case SegmentStep.MoveNextRight :: xs  => 
+            recurse(
+              rightSegment = rightSegment.tail,
+              currentRight = currentRight :+ rightSegment.head
+            )
+        case SegmentStep.AddLeftCommon :: xs  => 
+           recurse(
+              leftCompleteSegments = getCompletedSegments(
+                leftSegment.head,
+                currentLeft,
+                leftCompleteSegments
+              ),
+              rightCompleteSegments = getCompletedSegments(
+                leftSegment.head,
+                currentRight,
+                rightCompleteSegments
+              ),
+              currentLeft = Nil,
+              currentRight = Nil,
+              leftSegment = leftSegment.tail,
+              currentCommon = currentCommon :+ leftSegment.head
+            )
+        case SegmentStep.AddRightCommon :: xs  => 
+            recurse(
+              leftCompleteSegments = getCompletedSegments(
+                rightSegment.head,
+                currentLeft,
+                leftCompleteSegments
+              ),
+              rightCompleteSegments = getCompletedSegments(
+                rightSegment.head,
+                currentRight,
+                rightCompleteSegments
+              ),
+              currentLeft = Nil,
+              currentRight = Nil,
+              rightSegment = rightSegment.tail,
+              currentCommon = currentCommon :+ rightSegment.head
+            )
+      }
+    }
+
+    def extractSegments(
+      leftSegment: Segment, 
+      rightSegment: Segment,
+      commands: Seq[SegmentStep.Value]
+    ) : (Part,Part) = {
+      extractSegments(leftSegment.points, rightSegment.points, commands, ParseState(), Nil, Nil, Nil, Nil, Nil)
+    }
+    
+    "Can process path list" should "combine items" in {
+        val lineUp = NewSegment((0,0),(0,1))
+        val lineAcross = NewSegment((0,0),(1,0))
+       
+        import SegmentStep._
+
+        val result = 
+          extractSegments(lineUp,lineAcross, 
+            Seq(
+              MoveNextLeft, 
+              MoveNextLeft, 
+              MoveNextRight, 
+              MoveNextRight)
+          )
+
+        result._1 should equal (
+          new Part(lineUp :: Nil)
+        )
+        result._2 should equal (
+          new Part(lineAcross :: Nil)
+        )
+    }
+
+    "Can process path list" should "step through lists" in {
+        val lineUp = NewSegment((0,0),(0,1))
+       
+        import SegmentStep._
+
+        val result = 
+          extractSegments(lineUp,lineUp, 
+            Seq(
+              AddRightCommon, 
+              AddLeftCommon, 
+              AddRightCommon, 
+              AddLeftCommon)
+          )
+
+        val expected = new Part(NewSegment((0,0),(0,0),(0,1),(0,1)) :: Nil)
+
+        result._1 should equal (expected)
+        result._2 should equal (expected)
+    }
+
+    "Can process path list" should "combine overlappint and non-overlapping pieces" in {
+          import SegmentStep._
+          val lineUp = NewSegment((0,0),(0,1),(0,2))
+          val lineUpEnd = NewSegment((0,1.5),(0,2))
+          val result = extractSegments(lineUp, lineUpEnd,
+            Seq(
+              MoveNextLeft,
+              MoveNextLeft,
+              AddRightCommon,
+              AddRightCommon,
+              AddLeftCommon))
+
+        result._1 should equal (
+            new Part(
+              NewSegment((0,0),(0,1),(0,1.5)) :: 
+              NewSegment((0,1.5),(0,2),(0,2)) :: 
+              Nil
+            )
+        )
+        //result._2 should equal (lineUpEnd)
     }
   }
 }
