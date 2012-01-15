@@ -293,11 +293,70 @@ package net.hasnext.mapping.combinelines.tests {
         Nil)
     }
 
+    case class PointCrossIndex(
+      val index : Int, 
+      val point : MapPoint, 
+      val crossIndex : Option[Int]
+    )
+
+    def getCrossIndexedList(list : Segment, listToCrossIndex: Segment) = {
+      val points = list.points
+      val locations = points.map(p => pointOnSegment(p, listToCrossIndex))
+      val indexPointAndCrossIndex = points.zipWithIndex.zip(locations)
+                                                  
+      indexPointAndCrossIndex.map(x => x match {
+        case ((point, index), crossIndex) => PointCrossIndex(index, point, crossIndex)
+      })
+    }
+
+    def processIndexedPoints(
+      left : Seq[PointCrossIndex],
+      right : Seq[PointCrossIndex]
+    ) : List[SegmentStep.Value] = {
+      import SegmentStep._
+      println(left)
+      (left.toList, right.toList) match {
+        case (Nil,Nil) => 
+          Nil
+        case (PointCrossIndex(_,_,None) :: xs, _) => 
+        {
+          MoveNextLeft :: processIndexedPoints(xs, right)    
+        }
+        case (_, PointCrossIndex(_,_,None) :: xs) => 
+        {
+          MoveNextRight :: processIndexedPoints(left, xs)    
+        }
+        case (x :: xs, Nil) => 
+        {
+          MoveNextLeft :: processIndexedPoints(xs, Nil)    
+        }
+        case (Nil, x :: xs) => 
+        {
+          MoveNextRight :: processIndexedPoints(Nil, xs)    
+        }
+        case (
+          PointCrossIndex(leftIndex, leftPoint, Some(leftCrossIndex)) :: xs, 
+          PointCrossIndex(rightIndex, rightPoint, Some(rightCrossIndex)) :: ys
+        ) =>
+        {
+          if(leftCrossIndex <= rightIndex){
+            AddLeftCommon :: processIndexedPoints(xs, right)
+          }
+          else{
+            AddRightCommon :: processIndexedPoints(left, ys)
+          }
+        }
+      }
+    }
+
     def getExtractCommands(
       leftSegment: Segment, 
       rightSegment: Segment
     ) : Seq[SegmentStep.Value] = {
-      Nil
+      val leftCrossIndexed = getCrossIndexedList(leftSegment, rightSegment)
+      val rightCrossIndexed = getCrossIndexedList(rightSegment, leftSegment)
+
+      processIndexedPoints(leftCrossIndexed, rightCrossIndexed)
     }
 
     "Can process path list" should "combine items" in {
@@ -320,6 +379,24 @@ package net.hasnext.mapping.combinelines.tests {
         )
         result._2 should equal (
           new Part(lineAcross :: Nil)
+        )
+    }
+    
+    "Can get extract commands" should "combine items" in {
+        val lineUp = NewSegment((0,0),(0,1))
+        val lineAcross = NewSegment((1,1),(1,0))
+       
+        import SegmentStep._
+
+        val result = getExtractCommands(lineUp,lineAcross)
+
+        result should equal (
+          Seq(
+            MoveNextLeft, 
+            MoveNextLeft, 
+            MoveNextRight,
+            MoveNextRight
+          )
         )
     }
 
