@@ -174,10 +174,27 @@ package net.hasnext.mapping.combinelines.tests {
       val currentSegment : Seq[MapPoint],
       val completedSegments : Seq[Segment]
     ){
-      def moveNext = {
+      def moveNext(currentCommon: Seq[MapPoint]) = {
+          if(currentCommon == Nil){
+            SegmentState(
+              inputs.tail,
+              currentSegment = currentSegment :+ inputs.head,
+              completedSegments
+            )
+          }
+          else{
+            SegmentState(
+              inputs.tail,
+              currentSegment = currentSegment :+ currentCommon.last :+ inputs.head,
+              completedSegments
+            )
+          }
+      }
+      
+      def otherMoveNext(currentCommon: Seq[MapPoint]) = {
         SegmentState(
-          inputs.tail,
-          currentSegment = currentSegment :+ inputs.head,
+          inputs,
+          currentSegment = currentSegment,
           completedSegments
         )
       }
@@ -239,11 +256,13 @@ package net.hasnext.mapping.combinelines.tests {
           )
         case SegmentStep.MoveNextLeft :: xs  => 
             recurse(
-              left = left.moveNext
+              left = left.moveNext(currentCommon),
+              right = right.otherMoveNext(currentCommon)
             )
         case SegmentStep.MoveNextRight :: xs  => 
             recurse(
-              right = right.moveNext
+              right = right.moveNext(currentCommon),
+              left = left.otherMoveNext(currentCommon)
             )
         case SegmentStep.AddLeftCommon :: xs  => 
           val item = left.inputs.head
@@ -273,7 +292,14 @@ package net.hasnext.mapping.combinelines.tests {
         commands, 
         Nil)
     }
-    
+
+    def getExtractCommands(
+      leftSegment: Segment, 
+      rightSegment: Segment
+    ) : Seq[SegmentStep.Value] = {
+      Nil
+    }
+
     "Can process path list" should "combine items" in {
         val lineUp = NewSegment((0,0),(0,1))
         val lineAcross = NewSegment((0,0),(1,0))
@@ -305,16 +331,33 @@ package net.hasnext.mapping.combinelines.tests {
         val result = 
           extractSegments(lineUp,lineUp, 
             Seq(
-              AddRightCommon, 
               AddLeftCommon, 
               AddRightCommon, 
-              AddLeftCommon)
+              AddLeftCommon,
+              AddRightCommon)
           )
 
         val expected = new Part(NewSegment((0,0),(0,0),(0,1),(0,1)) :: Nil)
 
         result._1 should equal (expected)
         result._2 should equal (expected)
+    }
+    
+    "Can get extract commands" should "step through lists" in {
+        val lineUp = NewSegment((0,0),(0,1))
+       
+        import SegmentStep._
+
+        val result = getExtractCommands(lineUp,lineUp)
+
+        result should equal (
+          Seq(
+            AddLeftCommon, 
+            AddRightCommon, 
+            AddLeftCommon,
+            AddRightCommon
+          )
+        )
     }
 
     "Can process path list" should "combine overlappint and non-overlapping pieces" in {
@@ -339,6 +382,67 @@ package net.hasnext.mapping.combinelines.tests {
         result._2 should equal (
             new Part(
               NewSegment((0,1.5),(0,2),(0,2)) :: Nil
+            )
+        )
+    }
+    
+    "Can process path list" should "combine overlappint and non-overlapping pieces - should be the same in reverse" in {
+          import SegmentStep._
+          val lineUp = NewSegment((0,0),(0,1),(0,2))
+          val lineUpEnd = NewSegment((0,1.5),(0,2))
+          val result = extractSegments(lineUpEnd, lineUp,
+            Seq(
+              MoveNextRight,
+              MoveNextRight,
+              AddLeftCommon,
+              AddLeftCommon,
+              AddRightCommon))
+
+        result._2 should equal (
+            new Part(
+              NewSegment((0,0),(0,1),(0,1.5)) :: 
+              NewSegment((0,1.5),(0,2),(0,2)) :: 
+              Nil
+            )
+        )
+        result._1 should equal (
+            new Part(
+              NewSegment((0,1.5),(0,2),(0,2)) :: Nil
+            )
+        )
+    }
+    
+    "Can process path list" should "combine segment is in the middle" in {
+          import SegmentStep._
+          val leftLine = NewSegment((0,0),(0,1),(0,2),(0,3))
+          val rightLine = NewSegment((1,1),(0,1),(0,2),(1,2))
+          val result = extractSegments(leftLine, rightLine,
+            Seq(
+              MoveNextLeft,
+              MoveNextRight,
+              AddLeftCommon,
+              AddRightCommon,
+              AddLeftCommon,
+              AddRightCommon,
+              MoveNextRight,
+              MoveNextLeft
+            ))
+
+        result._1 should equal (
+            new Part(
+              NewSegment((0,0),(0,1)) :: 
+              NewSegment((0,1),(0,1),(0,2),(0,2)) :: 
+              NewSegment((0,2),(0,3)) :: 
+              Nil
+            )
+        )
+
+        result._2 should equal (
+            new Part(
+              NewSegment((1,1),(0,1)) :: 
+              NewSegment((0,1),(0,1),(0,2),(0,2)) :: 
+              NewSegment((0,2),(1,2)) :: 
+              Nil
             )
         )
     }
