@@ -178,7 +178,6 @@ package net.hasnext.mapping.combinelines.tests {
       leftSegment: Seq[MapPoint],
       rightSegment: Seq[MapPoint],
       commands: Seq[SegmentStep.Value],
-      state: ParseState,
       currentLeft: Seq[MapPoint],
       currentRight: Seq[MapPoint],
       currentCommon: Seq[MapPoint],
@@ -188,14 +187,13 @@ package net.hasnext.mapping.combinelines.tests {
         leftSegment: Seq[MapPoint] = leftSegment,
         rightSegment: Seq[MapPoint] = rightSegment,
         commands: Seq[SegmentStep.Value] = commands.tail,
-        state: ParseState = state,
         currentLeft: Seq[MapPoint] = currentLeft,
         currentRight: Seq[MapPoint] = currentRight,
         currentCommon: Seq[MapPoint] = currentCommon,
         leftCompleteSegments: Seq[Segment] = leftCompleteSegments,
         rightCompleteSegments: Seq[Segment] = rightCompleteSegments
       ) = {
-        extractSegments(leftSegment, rightSegment, commands, state,
+        extractSegments(leftSegment, rightSegment, commands, 
           currentLeft, currentRight, currentCommon, leftCompleteSegments, rightCompleteSegments)
       }
 
@@ -273,7 +271,7 @@ package net.hasnext.mapping.combinelines.tests {
       rightSegment: Segment,
       commands: Seq[SegmentStep.Value]
     ) : (Part,Part) = {
-      extractSegments(leftSegment.points, rightSegment.points, commands, ParseState(), Nil, Nil, Nil, Nil, Nil)
+      extractSegments(leftSegment.points, rightSegment.points, commands, Nil, Nil, Nil, Nil, Nil)
     }
     
     "Can process path list" should "combine items" in {
