@@ -206,6 +206,14 @@ package net.hasnext.mapping.combinelines.tests {
           getCompletedSegments(item)
         )
       }
+      
+      def partOfNonEmptySegments(segments: Seq[Segment]) = {
+        new Part(segments.filter(x=> x.points != Nil))
+      }
+
+      def complete(currentCommon : Seq[MapPoint]) = {
+          partOfNonEmptySegments(completedSegments :+ new Segment(currentCommon) :+ new Segment(currentSegment))
+      }
     }
 
     def extractSegments(
@@ -223,16 +231,11 @@ package net.hasnext.mapping.combinelines.tests {
         extractSegments(left, right, commands, currentCommon)
       }
 
-      def partOfNonEmptySegments(segments: Seq[Segment]) = {
-        new Part(segments.filter(x=> x.points != Nil))
-      }
-
-
       commands match {
         case Nil =>
           (
-            partOfNonEmptySegments(left.completedSegments :+ new Segment(currentCommon) :+ new Segment(left.currentSegment)), 
-            partOfNonEmptySegments(right.completedSegments :+ new Segment(currentCommon) :+ new Segment(right.currentSegment))
+            left.complete(currentCommon),
+            right.complete(currentCommon)
           )
         case SegmentStep.MoveNextLeft :: xs  => 
             recurse(
@@ -333,7 +336,11 @@ package net.hasnext.mapping.combinelines.tests {
               Nil
             )
         )
-        //result._2 should equal (lineUpEnd)
+        result._2 should equal (
+            new Part(
+              NewSegment((0,1.5),(0,2),(0,2)) :: Nil
+            )
+        )
     }
   }
 }
