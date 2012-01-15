@@ -169,11 +169,6 @@ package net.hasnext.mapping.combinelines.tests {
       val AddRightCommon = Value
     }
 
-    case class ParseState(
-      val leftInSegment: Boolean = false,
-      val rightInSegment: Boolean =  false,
-      val buildingCommon: Boolean = false)
-
     def extractSegments(
       leftSegment: Seq[MapPoint],
       rightSegment: Seq[MapPoint],
